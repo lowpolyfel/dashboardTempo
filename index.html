@@ -3,72 +3,97 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Dashboard de Máquinas — Jornada 06:00–16:00</title>
+<title>Dashboard de Máquinas — Jornada 06:00–12:00</title>
 <style>
   :root{
-    --bg:#fff;
+    font-size:16px;
+    --bg:#f5f5f7;
     --panel:#fff;
-    --muted:#ff;
-    --text:#000;
-    --ok:#000;
-    --bad:#000;
-    --warn:#000;
-    --line:#1f2430;
-    --chip-bg:#fff;
-    --chip-br:#fff;
-    --accent:#4da3ff;
+    --panel-border:1px solid rgba(0,0,0,0.04);
+    --panel-radius:22px;
+    --shadow:0 22px 50px rgba(20,24,40,0.08);
+    --text:#1d1d1f;
+    --muted:#6e6e73;
+    --line:rgba(209,209,214,0.8);
+    --divider:1.5px solid rgba(209,209,214,0.8);
+    --head-text:#6e6e73;
+    --cell-text:#3a3a3c;
+    --cond-text:#515154;
+    --status-shadow:inset 0 -2px 6px rgba(0,0,0,0.12);
+    --status-ok-bg:linear-gradient(135deg,rgba(52,199,89,0.65),rgba(88,224,118,0.95));
+    --status-warn-bg:linear-gradient(135deg,rgba(255,204,0,0.7),rgba(255,214,40,0.95));
+    --status-bad-bg:linear-gradient(135deg,rgba(255,59,48,0.78),rgba(255,105,97,0.95));
+    --status-future-bg:repeating-linear-gradient(135deg,rgba(210,210,215,0.45) 0,rgba(210,210,215,0.45) 6px,rgba(255,255,255,0.7) 6px,rgba(255,255,255,0.7) 12px);
+    --status-ok-border:rgba(52,199,89,0.45);
+    --status-warn-border:rgba(255,204,0,0.55);
+    --status-bad-border:rgba(255,59,48,0.5);
+    --status-future-border:rgba(210,210,215,0.6);
+    --chip-bad-bg:rgba(255,59,48,0.12);
+    --chip-bad-border:rgba(255,59,48,0.35);
+    --chip-bad-text:#a22022;
+    --chip-warn-bg:rgba(255,204,0,0.16);
+    --chip-warn-border:rgba(255,204,0,0.4);
+    --chip-warn-text:#ad5f00;
+    --pill-bg:#fff;
+    --pill-border:1px solid rgba(209,209,214,0.8);
+    --pill-shadow:0 6px 16px rgba(0,0,0,0.08);
+    --now-bg:rgba(0,113,227,0.08);
+    --now-outline:#0071e3;
+    --time-gradient:linear-gradient(90deg,var(--panel) 75%,rgba(255,255,255,0));
   }
   *{box-sizing:border-box}
   html,body{height:100%}
   body{
     margin:0;
-    font-family: ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Inter,Helvetica,Arial;
-    background:#fff;
+    font-family:"SF Pro Display","SF Pro Text",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+    background:var(--bg);
     color:var(--text);
+    -webkit-font-smoothing:antialiased;
   }
-  .wrap{max-width:1200px;margin-inline:auto;padding:28px 18px 40px}
-  header{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:18px}
+  .wrap{max-width:min(1400px,98vw);margin-inline:auto;padding:42px 8px 72px;display:flex;flex-direction:column;gap:28px}
+  header{display:flex;align-items:flex-start;justify-content:space-between;gap:20px}
   .title{display:flex;flex-direction:column;gap:6px}
-  .title h1{margin:0;font-size:clamp(18px,2.2vw,24px);font-weight:650;letter-spacing:.3px}
-  .subtitle{color:var(--muted);font-size:14px}
-  .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
-  .chip{display:inline-flex;align-items:center;gap:8px;padding:8px 10px;border:1px solid var(--chip-br);border-radius:12px;background:var(--chip-bg);color:var(--muted);font-size:12.5px}
-  .dot{width:8px;height:8px;border-radius:999px;background:var(--muted);box-shadow:0 0 0 1px #0003 inset}
-  .dot.ok{background:var(--ok)}
-  .dot.bad{background:var(--bad)}
-  .dot.warn{background:var(--warn)}
+  .title h1{margin:0;font-size:clamp(20px,2.6vw,30px);font-weight:650;letter-spacing:.2px;color:var(--text)}
+  .subtitle{color:var(--muted);font-size:14px;line-height:1.6}
+  .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+  .chip{display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border:1px solid rgba(0,0,0,0.06);border-radius:999px;background:#fff;color:var(--muted);font-size:12.5px}
+  .dot{width:8px;height:8px;border-radius:999px;background:var(--muted);box-shadow:0 0 0 1px rgba(0,0,0,0.06) inset}
+  .dot.ok{background:rgba(52,199,89,0.8)}
+  .dot.warn{background:rgba(255,204,0,0.9)}
+  .dot.bad{background:rgba(255,59,48,0.85)}
   .controls{display:flex;flex-wrap:wrap;gap:10px}
-  button,.ghost{appearance:none;border:1px solid #2a3244;background:#101521;color:var(--text);padding:10px 12px;border-radius:10px;font-weight:600;cursor:pointer;transition:.18s transform ease,.18s background ease,.18s border-color ease}
-  button:hover{transform:translateY(-1px);border-color:#334059;background:#111827}
-  .ghost{background:transparent}
-  .panel{background:var(--panel);border:1px solid #fff;border-radius:16px;overflow:hidden;box-shadow:0 10px 28px rgba(0,0,0,.25)}
-  /* Tabla */
+  .action-btn{appearance:none;border:1px solid rgba(0,0,0,0.06);background:var(--panel);color:var(--text);padding:10px 18px;border-radius:999px;font-weight:600;cursor:pointer;transition:.18s transform ease,.18s background ease,.18s border-color ease;box-shadow:0 10px 20px rgba(0,0,0,0.06)}
+  .action-btn:hover{transform:translateY(-1px);border-color:rgba(0,0,0,0.12);background:rgba(255,255,255,0.85)}
+  .action-btn.ghost{background:transparent}
+  .panel{background:var(--panel);border:var(--panel-border);border-radius:var(--panel-radius);overflow:hidden;box-shadow:var(--shadow)}
   .tbl{width:100%;border-collapse:separate;border-spacing:0}
-  thead th{
-    position:sticky;top:0;z-index:3;background:linear-gradient(180deg,#141a24 0%,#141821 100%);
-    color:#cfd7ea;border-bottom:1px solid var(--line);padding:14px 12px;font-size:13px;
-    text-transform:uppercase;letter-spacing:.06em;font-weight:700;
-  }
-  thead .sub{font-size:12px;text-transform:none;letter-spacing:0;color:#aab3c9}
-  tbody td{padding:12px;border-bottom:1px dashed #20283a;font-size:14.5px;color:#dfe6f7}
-  tbody tr:nth-child(odd){background:rgba(255,255,255,0.01)}
-  tbody tr:hover{background:#fff}
-  .time{
-    position:sticky;left:0;background:linear-gradient(90deg,#141821 70%,rgba(20,24,33,0));
-    z-index:2;font-weight:700;color:#c9d3ea;border-right:1px solid var(--line)
-  }
-  .status{
-    display:inline-flex;align-items:center;gap:8px;font-weight:650;padding:6px 10px;border-radius:999px;
-    background:#0f141e;border:1px solid #273045
-  }
-  .status.ok{color:#ccffe1;border-color:#1d3c2c;background:rgba(24,201,100,.10)}
-  .status.bad{color:#ffe1e1;border-color:#402126;background:rgba(255,77,79,.10)}
-  .status.warn{color:#fff5dc;border-color:#3d2d12;background:rgba(255,191,71,.12)}
-  .cond{color:#cdd6ee}
-  .mini{display:flex;gap:10px;align-items:center;color:var(--muted);font-size:12px}
-  .pill{padding:.2rem .55rem;border-radius:999px;border:1px solid var(--chip-br);color:#c9d3ea;background:#0f141e;font-size:12px}
-  .now{outline:2px solid var(--accent);outline-offset:-2px;background:#10182a !important}
+  thead th{position:sticky;top:0;z-index:3;background:var(--panel);color:var(--head-text);border-bottom:1px solid var(--line);padding:16px 14px;font-size:12.5px;text-transform:uppercase;letter-spacing:.08em;font-weight:600}
+  thead th.machine-head{padding-inline:18px 16px}
+  thead th.machine-head:not(:first-of-type){border-left:var(--divider)}
+  thead .sub{font-size:12px;text-transform:none;letter-spacing:0;color:var(--muted);margin-top:2px;font-weight:500}
+  tbody td{padding:16px 16px;border-bottom:1px solid var(--line);font-size:14.5px;color:var(--cell-text);vertical-align:top}
+  tbody td.machine-divider{border-left:var(--divider)}
+  tbody td.status-cell{text-align:center;width:90px}
+  tbody tr:nth-child(odd){background:rgba(0,0,0,0.015)}
+  tbody tr:hover{background:#f7f7fb}
+  .time{position:sticky;left:0;background:var(--time-gradient);z-index:2;font-weight:600;color:var(--text);border-right:1px solid var(--line)}
+  .status-swatch{display:inline-flex;width:60px;height:22px;border-radius:999px;box-shadow:var(--status-shadow)}
+  .status-swatch.ok{background:var(--status-ok-bg);border:1px solid var(--status-ok-border)}
+  .status-swatch.warn{background:var(--status-warn-bg);border:1px solid var(--status-warn-border)}
+  .status-swatch.bad{background:var(--status-bad-bg);border:1px solid var(--status-bad-border)}
+  .status-swatch.future{background:var(--status-future-bg);border:1px solid var(--status-future-border);box-shadow:none}
+  .cond{color:var(--cond-text);line-height:1.5}
+  .cond-tags{display:flex;flex-wrap:wrap;gap:6px}
+  .cond-chip{display:inline-flex;align-items:center;justify-content:center;min-width:42px;padding:6px 12px;border-radius:14px;font-size:11.5px;font-weight:600;text-transform:none}
+  .cond-chip.bad{background:var(--chip-bad-bg);border:1px solid var(--chip-bad-border);color:var(--chip-bad-text)}
+  .cond-chip.warn{background:var(--chip-warn-bg);border:1px solid var(--chip-warn-border);color:var(--chip-warn-text)}
+  .mini{display:flex;flex-wrap:wrap;gap:12px;align-items:center;color:var(--muted);font-size:12.5px;margin-top:20px}
+  .pill{padding:.35rem .8rem;border-radius:999px;border:var(--pill-border);color:var(--text);background:var(--pill-bg);font-size:12.5px;box-shadow:var(--pill-shadow)}
+  .now{box-shadow:inset 0 0 0 2px var(--now-outline);background:var(--now-bg)!important}
   @media (max-width: 900px){
+    header{flex-direction:column}
+    .controls{width:100%}
+    .controls .action-btn{flex:1;justify-content:center;text-align:center}
     thead .hide-sm, tbody .hide-sm{display:none}
     .subtitle{max-width:500px}
   }
@@ -80,7 +105,7 @@
       <div class="title">
         <h1>Dashboard de Operación — 4 Máquinas</h1>
         <div class="subtitle">
-          Jornada: <strong>06:00</strong> a <strong>16:00</strong> · Intervalo cada <strong>15 min</strong>
+          Jornada: <strong>06:00</strong> a <strong>12:00</strong> · Intervalo cada <strong>15 min</strong>
           <div class="chips">
             <span class="chip"><span class="dot ok"></span> Estado positivo</span>
             <span class="chip"><span class="dot warn"></span> Aviso</span>
@@ -89,8 +114,7 @@
         </div>
       </div>
       <div class="controls">
-        <button id="regen">Generar nuevos datos</button>
-        <button id="scrollNow" class="ghost">Ir al bloque horario actual</button>
+        <button id="scrollNow" class="action-btn ghost">Ir al bloque horario actual</button>
       </div>
     </header>
 
@@ -101,7 +125,7 @@
       </table>
     </div>
 
-    <div class="mini" style="margin-top:12px">
+    <div class="mini">
       <span class="pill" id="summary-ok">OK: —</span>
       <span class="pill" id="summary-warn">Avisos: —</span>
       <span class="pill" id="summary-bad">Fallas: —</span>
@@ -110,103 +134,104 @@
   </div>
 
 <script>
-(function(){
-  // ----- Configuración -----
+(()=>{
   const machines = [
-    { name: "Máquina 1" },
-    { name: "Máquina 2" },
-    { name: "Máquina 3" },
-    { name: "Máquina 4" },
+    {name:"Máquina A"},
+    {name:"Máquina B"},
+    {name:"Máquina C"},
+    {name:"Máquina D"}
   ];
 
-  // Condiciones base (en el mismo orden que tu hoja)
   const FIELDS = [
     "Gafete operador escaneado",
     "Gafete de técnico escaneado",
     "Carrete escaneado",
     "Hoja de ruta escaneada",
     "Cabezal en operación",
-    "Carrete en consumo",
+    "Carrete en consumo"
   ];
 
-  // Qué se considera crítico para caer en ROJO si está en false
   const CRITICAL = new Set([
     "Carrete escaneado",
     "Cabezal en operación",
-    "Carrete en consumo",
+    "Carrete en consumo"
   ]);
 
-  const start = "06:00";
-  const end   = "16:00";
+  const STATUS_LABELS = {
+    ok:"Estado óptimo",
+    warn:"Aviso de seguimiento",
+    bad:"Falla detectada",
+    future:"Pendiente de registrar"
+  };
+
   const stepMinutes = 15;
+  const start = "06:00";
+  const end = "12:00";
 
-  // Probabilidades base (afinables)
-  const P = {
-    badgeOperador: 0.96,
-    badgeTecnico : 0.94,
-    carreteScan  : 0.93,
-    hojaRuta     : 0.91,
-    operacion    : 0.82,
-    consumoSiOperando: 0.93, // si opera, prob de consumo true
-    consumoSiNoOpera : 0.10, // si no opera, casi siempre false
-  };
-
-  // ----- Utilidades -----
-  const toMinutes = (hhmm)=> {
+  function toMinutes(hhmm){
     const [h,m] = hhmm.split(":").map(Number);
-    return h*60+m;
-  };
-  const pad = (n)=> (n<10?"0":"")+n;
-  const fmt = (mins)=> `${pad(Math.floor(mins/60))}:${pad(mins%60)}`;
-  const buildSlots = (a,b,step)=>{const out=[],A=toMinutes(a),B=toMinutes(b);for(let t=A;t<=B;t+=step) out.push(fmt(t));return out;};
-  const chance = (p)=> Math.random()<p;
-
-  // Registra un diccionario de T/F por campo con correlaciones realistas
-  function crearRegistroTF(){
-    const tf = {};
-    tf[FIELDS[0]] = chance(P.badgeOperador);
-    tf[FIELDS[1]] = chance(P.badgeTecnico);
-    tf[FIELDS[2]] = chance(P.carreteScan);
-    tf[FIELDS[3]] = chance(P.hojaRuta);
-    tf[FIELDS[4]] = chance(P.operacion);
-    // Consumo depende de si está operando
-    tf[FIELDS[5]] = tf[FIELDS[4]] ? chance(P.consumoSiOperando) : chance(P.consumoSiNoOpera);
-    return tf;
+    return h*60 + m;
   }
 
-  // Evalúa: verde/amarillo/rojo + mensaje
-  function evaluarRegistro(tf){
+  function pad(num){
+    return String(num).padStart(2,"0");
+  }
+
+  function buildSlots(start,end,step){
+    const slots = [];
+    let cursor = toMinutes(start);
+    const endMinutes = toMinutes(end);
+    while(cursor <= endMinutes){
+      const h = Math.floor(cursor/60);
+      const m = cursor % 60;
+      slots.push(`${pad(h)}:${pad(m)}`);
+      cursor += step;
+    }
+    return slots;
+  }
+
+  function crearRegistroTF(){
+    const registro = {};
+    registro[FIELDS[0]] = Math.random() < 0.96;
+    registro[FIELDS[1]] = Math.random() < 0.94;
+    registro[FIELDS[2]] = Math.random() < 0.93;
+    registro[FIELDS[3]] = Math.random() < 0.91;
+    registro[FIELDS[4]] = Math.random() < 0.82;
+    registro[FIELDS[5]] = registro[FIELDS[4]] ? Math.random() < 0.93 : Math.random() < 0.1;
+    return registro;
+  }
+
+  function evaluarRegistro(registro){
     const errores = [];
     const avisos = [];
-    for(const k of FIELDS){
-      if(!tf[k]){
-        if(CRITICAL.has(k)) errores.push(`Error: ${k}`);
-        else avisos.push(`Aviso: ${k}`);
+
+    for(const campo of FIELDS){
+      if(!registro[campo]){
+        if(CRITICAL.has(campo)) errores.push(campo);
+        else avisos.push(campo);
       }
     }
+
     if(errores.length===0 && avisos.length===0){
-      return {class:"ok", label:"Activo", msg:"Todo en orden"};
+      return {class:"ok", errores, avisos};
     }
     if(errores.length>0){
-      return {class:"bad", label:"Falla", msg:[...errores, ...avisos].join(", ")};
+      return {class:"bad", errores, avisos};
     }
-    // solo avisos (faltantes no críticos)
-    return {class:"warn", label:"En espera", msg:avisos.join(", ")};
+    return {class:"warn", errores, avisos};
   }
 
-  // ----- Render de cabecera -----
   function renderHead(){
     const thead = document.getElementById("thead");
     const tr1 = document.createElement("tr");
     tr1.innerHTML = `
       <th style="left:0;z-index:4" class="time">Horario</th>
-      ${machines.map(m=>`<th colspan="2">${m.name}<div class="sub">Status · Condición (según reglas)</div></th>`).join("")}
+      ${machines.map(m=>`<th class="machine-head" colspan="2">${m.name}<div class="sub">Status · Condición</div></th>`).join("")}
     `;
     thead.innerHTML = "";
     thead.appendChild(tr1);
   }
 
-  // ----- Generación y render de datos -----
   function generateData(){
     const slots = buildSlots(start,end,stepMinutes);
 
@@ -221,36 +246,49 @@
     for(const hhmm of slots){
       const tr = document.createElement("tr");
 
-      // Columna horario
       const tdTime = document.createElement("td");
       tdTime.textContent = hhmm;
       tdTime.className = "time";
       tr.appendChild(tdTime);
 
-      // Por cada máquina: evaluar condiciones -> estado + detalle
-      machines.forEach(()=> {
-        const tf = crearRegistroTF();
-        const ev = evaluarRegistro(tf);
+      const rowMins = toMinutes(hhmm);
+      const isFuture = rowMins > currentMinutes;
 
+      machines.forEach((_, idx)=> {
         const tdStatus = document.createElement("td");
-        tdStatus.innerHTML = `<span class="status ${ev.class}">
-            <span class="dot ${ev.class}"></span>${ev.label}
-          </span>`;
-
+        tdStatus.className = "status-cell";
         const tdCond = document.createElement("td");
         tdCond.className = "cond";
-        tdCond.innerHTML = (ev.class==="ok")
-          ? `<span class="dot warn" style="margin-right:8px;opacity:.5"></span>Todo en orden`
-          : `<span class="dot ${ev.class==='bad'?'bad':'warn'}" style="margin-right:8px"></span>${ev.msg}`;
+
+        if(idx>0){
+          tdStatus.classList.add("machine-divider");
+        }
+
+        if(isFuture){
+          tdStatus.innerHTML = `<span class="status-swatch future" title="${STATUS_LABELS.future}" aria-label="${STATUS_LABELS.future}"></span>`;
+          tdCond.textContent = "";
+        } else {
+          const registro = crearRegistroTF();
+          const ev = evaluarRegistro(registro);
+          tdStatus.innerHTML = `<span class="status-swatch ${ev.class}" title="${STATUS_LABELS[ev.class]}" aria-label="${STATUS_LABELS[ev.class]}"></span>`;
+
+          if(ev.class === "ok"){
+            tdCond.textContent = "";
+            cOK++;
+          } else {
+            const chips = [
+              ...ev.errores.map(field => `<span class="cond-chip bad">${field}</span>`),
+              ...ev.avisos.map(field => `<span class="cond-chip warn">${field}</span>`)
+            ].join("");
+            tdCond.innerHTML = `<div class="cond-tags">${chips}</div>`;
+            if(ev.class === "warn") cWARN++; else cBAD++;
+          }
+        }
 
         tr.appendChild(tdStatus);
         tr.appendChild(tdCond);
-
-        if(ev.class==="ok") cOK++; else if(ev.class==="warn") cWARN++; else cBAD++;
       });
 
-      // Resalta el bloque horario actual si cae dentro del intervalo
-      const rowMins = toMinutes(hhmm);
       if (rowMins <= currentMinutes && currentMinutes < rowMins + stepMinutes){
         tr.classList.add("now");
         tr.id = "nowRow";
@@ -259,7 +297,6 @@
       tbody.appendChild(tr);
     }
 
-    // Resumen
     const total = cOK + cWARN + cBAD;
     const disponibilidad = total ? Math.round((cOK/total)*100) : 0;
     document.getElementById("summary-ok").textContent   = `OK: ${cOK}`;
@@ -268,19 +305,15 @@
     document.getElementById("summary-rate").textContent = `Disponibilidad: ${disponibilidad}%`;
   }
 
-  // ----- Acciones -----
   function scrollToNow(){
     const el = document.getElementById("nowRow");
     if(!el){ window.scrollTo({top:0,behavior:"smooth"}); return; }
     const top = el.getBoundingClientRect().top + window.scrollY - 90;
     window.scrollTo({top, behavior:"smooth"});
-    el.animate([{outlineColor:"transparent"}, {outlineColor:"var(--accent)"}], {duration:600,iterations:1});
   }
 
-  // Init
   renderHead();
   generateData();
-  document.getElementById("regen").addEventListener("click", generateData);
   document.getElementById("scrollNow").addEventListener("click", scrollToNow);
 })();
 </script>
