@@ -3,115 +3,255 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Dashboard de Máquinas — Jornada 06:00–16:00</title>
+<title>Dashboard de Máquinas — Exploración de Diseños</title>
 <style>
   :root{
-    --bg:#fff;
-    --panel:#fff;
-    --muted:#ff;
-    --text:#000;
-    --ok:#000;
-    --bad:#000;
-    --warn:#000;
-    --line:#1f2430;
-    --chip-bg:#fff;
-    --chip-br:#fff;
-    --accent:#4da3ff;
+    --font-primary:"SF Pro Display","SF Pro Text",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+    --body-bg:#f5f6f8;
+    --body-text:#1c1c1e;
+    --muted:#6e6e73;
+    --accent:#0066ff;
+    --ok:#2ecc71;
+    --warn:#f7b500;
+    --bad:#ff3b30;
   }
-  *{box-sizing:border-box}
-  html,body{height:100%}
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{min-height:100%}
   body{
-    margin:0;
-    font-family: ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Inter,Helvetica,Arial;
-    background:#fff;
-    color:var(--text);
+    font-family:var(--font-primary);
+    background:var(--body-bg);
+    color:var(--body-text);
+    -webkit-font-smoothing:antialiased;
   }
-  .wrap{max-width:1200px;margin-inline:auto;padding:28px 18px 40px}
-  header{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:18px}
-  .title{display:flex;flex-direction:column;gap:6px}
-  .title h1{margin:0;font-size:clamp(18px,2.2vw,24px);font-weight:650;letter-spacing:.3px}
-  .subtitle{color:var(--muted);font-size:14px}
-  .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
-  .chip{display:inline-flex;align-items:center;gap:8px;padding:8px 10px;border:1px solid var(--chip-br);border-radius:12px;background:var(--chip-bg);color:var(--muted);font-size:12.5px}
-  .dot{width:8px;height:8px;border-radius:999px;background:var(--muted);box-shadow:0 0 0 1px #0003 inset}
+  .page{max-width:1320px;margin-inline:auto;padding:56px 20px 96px;display:flex;flex-direction:column;gap:56px}
+  .page-head{display:flex;flex-wrap:wrap;justify-content:space-between;gap:28px}
+  .head-copy{max-width:640px;display:flex;flex-direction:column;gap:16px}
+  .head-copy h1{font-size:clamp(26px,3.4vw,34px);font-weight:680;letter-spacing:-0.01em}
+  .head-copy p{line-height:1.6;color:var(--muted);font-size:16px}
+  .meta-chips{display:flex;flex-wrap:wrap;gap:10px}
+  .meta-chip{display:inline-flex;align-items:center;gap:8px;padding:10px 16px;border-radius:999px;background:#fff;border:1px solid rgba(210,210,215,0.8);font-size:13px;color:var(--muted);box-shadow:0 6px 18px rgba(20,20,20,0.05)}
+  .dot{width:10px;height:10px;border-radius:999px;background:var(--muted)}
   .dot.ok{background:var(--ok)}
-  .dot.bad{background:var(--bad)}
   .dot.warn{background:var(--warn)}
-  .controls{display:flex;flex-wrap:wrap;gap:10px}
-  button,.ghost{appearance:none;border:1px solid #2a3244;background:#101521;color:var(--text);padding:10px 12px;border-radius:10px;font-weight:600;cursor:pointer;transition:.18s transform ease,.18s background ease,.18s border-color ease}
-  button:hover{transform:translateY(-1px);border-color:#334059;background:#111827}
-  .ghost{background:transparent}
-  .panel{background:var(--panel);border:1px solid #fff;border-radius:16px;overflow:hidden;box-shadow:0 10px 28px rgba(0,0,0,.25)}
-  /* Tabla */
-  .tbl{width:100%;border-collapse:separate;border-spacing:0}
-  thead th{
-    position:sticky;top:0;z-index:3;background:linear-gradient(180deg,#141a24 0%,#141821 100%);
-    color:#cfd7ea;border-bottom:1px solid var(--line);padding:14px 12px;font-size:13px;
-    text-transform:uppercase;letter-spacing:.06em;font-weight:700;
+  .dot.bad{background:var(--bad)}
+  .head-actions{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-start}
+  button{
+    appearance:none;
+    border-radius:999px;
+    border:1px solid rgba(210,210,215,0.7);
+    background:#fff;
+    padding:12px 20px;
+    font-size:14px;
+    font-weight:600;
+    color:var(--body-text);
+    cursor:pointer;
+    transition:.2s transform ease,.2s box-shadow ease,.2s background ease;
+    box-shadow:0 10px 24px rgba(15,15,15,0.08);
   }
-  thead .sub{font-size:12px;text-transform:none;letter-spacing:0;color:#aab3c9}
-  tbody td{padding:12px;border-bottom:1px dashed #20283a;font-size:14.5px;color:#dfe6f7}
-  tbody tr:nth-child(odd){background:rgba(255,255,255,0.01)}
-  tbody tr:hover{background:#fff}
-  .time{
-    position:sticky;left:0;background:linear-gradient(90deg,#141821 70%,rgba(20,24,33,0));
-    z-index:2;font-weight:700;color:#c9d3ea;border-right:1px solid var(--line)
-  }
-  .status{
-    display:inline-flex;align-items:center;gap:8px;font-weight:650;padding:6px 10px;border-radius:999px;
-    background:#0f141e;border:1px solid #273045
-  }
-  .status.ok{color:#ccffe1;border-color:#1d3c2c;background:rgba(24,201,100,.10)}
-  .status.bad{color:#ffe1e1;border-color:#402126;background:rgba(255,77,79,.10)}
-  .status.warn{color:#fff5dc;border-color:#3d2d12;background:rgba(255,191,71,.12)}
-  .cond{color:#cdd6ee}
-  .mini{display:flex;gap:10px;align-items:center;color:var(--muted);font-size:12px}
-  .pill{padding:.2rem .55rem;border-radius:999px;border:1px solid var(--chip-br);color:#c9d3ea;background:#0f141e;font-size:12px}
-  .now{outline:2px solid var(--accent);outline-offset:-2px;background:#10182a !important}
-  @media (max-width: 900px){
-    thead .hide-sm, tbody .hide-sm{display:none}
-    .subtitle{max-width:500px}
+  button:hover{transform:translateY(-1px);box-shadow:0 14px 32px rgba(15,15,15,0.12);}
+  button.secondary{background:rgba(0,102,255,0.08);border-color:rgba(0,102,255,0.35);color:var(--accent)}
+
+  main{display:flex;flex-direction:column;gap:80px}
+  .concept{display:flex;flex-direction:column;gap:32px;position:relative}
+  .concept::before{content:"";position:absolute;inset:0;border-radius:28px;z-index:-1;opacity:0.35;pointer-events:none}
+  .concept-meta{max-width:720px;display:flex;flex-direction:column;gap:14px}
+  .concept-meta .badge{display:inline-flex;align-items:center;gap:8px;font-size:12px;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted)}
+  .concept-meta h2{font-size:clamp(22px,3vw,30px);font-weight:670}
+  .concept-meta p{line-height:1.7;color:var(--muted);font-size:15px}
+  .concept-body{display:flex;flex-direction:column;gap:22px}
+  .summary{display:flex;flex-wrap:wrap;gap:10px}
+  .summary-chip{display:inline-flex;align-items:center;gap:8px;padding:8px 14px;border-radius:999px;font-size:12.5px;font-weight:600;background:rgba(255,255,255,0.7);border:1px solid rgba(210,210,215,0.7)}
+  .summary-chip.ok{color:var(--ok);border-color:rgba(46,204,113,0.4);background:rgba(46,204,113,0.1)}
+  .summary-chip.warn{color:#b36b00;border-color:rgba(247,181,0,0.4);background:rgba(247,181,0,0.12)}
+  .summary-chip.bad{color:#d32a1f;border-color:rgba(255,59,48,0.4);background:rgba(255,59,48,0.14)}
+  .summary-chip.rate{color:var(--accent);border-color:rgba(0,102,255,0.28);background:rgba(0,102,255,0.1)}
+
+  /* --- Propuesta A: Matriz aireada --- */
+  .concept-a{--panel-bg:#ffffff;--panel-border:rgba(210,210,215,0.75);--stripe:#f7f8fb}
+  .concept-a::before{background:linear-gradient(120deg,rgba(255,255,255,0.9),rgba(255,255,255,0));filter:blur(0px)}
+  .concept-a .panel{border-radius:26px;background:var(--panel-bg);border:1px solid var(--panel-border);overflow:hidden;box-shadow:0 24px 48px rgba(15,15,15,0.12)}
+  .grid-a{width:100%;border-collapse:separate;border-spacing:0}
+  .grid-a thead th{position:sticky;top:0;background:#fff;padding:18px 16px;font-size:12.5px;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid rgba(210,210,215,0.8);font-weight:600}
+  .grid-a thead th.time{left:0;z-index:4;box-shadow:14px 0 18px -16px rgba(0,0,0,0.18)}
+  .grid-a thead th.machine{border-left:1.5px solid rgba(210,210,215,0.65)}
+  .grid-a thead .sub{display:block;margin-top:4px;font-size:12px;font-weight:500;letter-spacing:0;color:#86868b;text-transform:none}
+  .grid-a tbody td{padding:18px 16px;font-size:14px;border-bottom:1px solid rgba(210,210,215,0.45);vertical-align:top;color:#2c2c2e}
+  .grid-a tbody td.machine-divider{border-left:1.5px solid rgba(210,210,215,0.65)}
+  .grid-a tbody tr:nth-child(odd){background:var(--stripe)}
+  .grid-a tbody tr:hover{background:#eef2ff}
+  .grid-a .time-cell{font-weight:600;position:sticky;left:0;background:linear-gradient(90deg,#fff 82%,rgba(255,255,255,0));z-index:3;border-right:1px solid rgba(210,210,215,0.55)}
+  .grid-a .status{display:flex;justify-content:center}
+  .grid-a .swatch{width:60px;height:22px;border-radius:999px;border:1px solid rgba(210,210,215,0.65);box-shadow:inset 0 -2px 6px rgba(0,0,0,0.12)}
+  .grid-a .swatch.ok{background:linear-gradient(135deg,rgba(46,204,113,0.6),rgba(109,218,157,0.95));border-color:rgba(46,204,113,0.5)}
+  .grid-a .swatch.warn{background:linear-gradient(135deg,rgba(247,181,0,0.65),rgba(255,213,79,0.9));border-color:rgba(247,181,0,0.5)}
+  .grid-a .swatch.bad{background:linear-gradient(135deg,rgba(255,59,48,0.75),rgba(255,115,105,0.95));border-color:rgba(255,59,48,0.5)}
+  .grid-a .swatch.future{background:repeating-linear-gradient(135deg,rgba(210,210,215,0.4) 0,rgba(210,210,215,0.4) 6px,rgba(255,255,255,0.65) 6px,rgba(255,255,255,0.65) 12px);box-shadow:none}
+  .grid-a .tags{display:flex;flex-wrap:wrap;gap:6px}
+  .grid-a .tag{display:inline-flex;align-items:center;justify-content:center;min-width:40px;padding:6px 12px;border-radius:14px;font-size:11.5px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase}
+  .grid-a .tag.bad{background:rgba(255,59,48,0.16);border:1px solid rgba(255,59,48,0.35);color:#a61e1a}
+  .grid-a .tag.warn{background:rgba(247,181,0,0.16);border:1px solid rgba(247,181,0,0.35);color:#9f6000}
+  .grid-a tr.current{outline:2px solid var(--accent);outline-offset:-2px;background:rgba(0,102,255,0.09)!important}
+
+  /* --- Propuesta B: Tarjetas modulares --- */
+  .concept-b{--surface:linear-gradient(135deg,#fefcff,#edf2ff);--card-bg:#ffffff;--card-border:rgba(107,119,255,0.25);--divider:rgba(120,120,180,0.22);--future:rgba(189,198,255,0.18);}
+  .concept-b::before{background:var(--surface);filter:blur(0px)}
+  .concept-b .concept-body{gap:28px}
+  .concept-b .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px}
+  .concept-b .slot-card{background:var(--card-bg);border:1px solid var(--card-border);border-radius:24px;padding:20px 20px 18px;box-shadow:0 24px 36px rgba(30,30,70,0.18);display:flex;flex-direction:column;gap:18px;position:relative;overflow:hidden}
+  .concept-b .slot-card.current{border-color:rgba(46,204,113,0.55);box-shadow:0 32px 48px rgba(30,80,120,0.25)}
+  .concept-b .slot-card::after{content:"";position:absolute;inset:auto 16px 16px 16px;height:4px;border-radius:999px;background:linear-gradient(90deg,rgba(46,204,113,0.8),rgba(255,213,79,0.8),rgba(255,82,82,0.85));opacity:0.2}
+  .concept-b .slot-card.future::after{background:repeating-linear-gradient(90deg,rgba(170,180,255,0.3) 0,rgba(170,180,255,0.3) 12px,rgba(255,255,255,0.4) 12px,rgba(255,255,255,0.4) 24px);opacity:0.6}
+  .concept-b .slot-header{display:flex;justify-content:space-between;align-items:center}
+  .concept-b .slot-time{font-size:22px;font-weight:670;letter-spacing:-0.02em}
+  .concept-b .slot-status{display:flex;gap:10px}
+  .concept-b .slot-status .pill{width:12px;height:12px;border-radius:50%;background:var(--future)}
+  .concept-b .slot-status .pill.ok{background:linear-gradient(135deg,rgba(46,204,113,0.4),rgba(46,204,113,0.85))}
+  .concept-b .slot-status .pill.warn{background:linear-gradient(135deg,rgba(247,181,0,0.4),rgba(247,181,0,0.9))}
+  .concept-b .slot-status .pill.bad{background:linear-gradient(135deg,rgba(255,82,82,0.55),rgba(255,138,128,0.95))}
+  .concept-b .slot-body{display:flex;flex-direction:column;gap:16px}
+  .concept-b .machine-row{display:flex;gap:14px;align-items:flex-start;padding-bottom:12px;border-bottom:1px dashed var(--divider)}
+  .concept-b .machine-row:last-child{border-bottom:none;padding-bottom:0}
+  .concept-b .machine-label{flex:0 0 110px;font-size:13px;font-weight:650;text-transform:uppercase;letter-spacing:0.08em;color:#5b5b89}
+  .concept-b .machine-status{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+  .concept-b .status-bar{flex:0 0 70px;height:10px;border-radius:999px;background:var(--future)}
+  .concept-b .status-bar.ok{background:linear-gradient(90deg,rgba(46,204,113,0.3),rgba(46,204,113,0.85))}
+  .concept-b .status-bar.warn{background:linear-gradient(90deg,rgba(247,181,0,0.3),rgba(247,181,0,0.9))}
+  .concept-b .status-bar.bad{background:linear-gradient(90deg,rgba(255,82,82,0.45),rgba(255,138,128,0.95))}
+  .concept-b .machine-tags{display:flex;flex-wrap:wrap;gap:6px}
+  .concept-b .chip{padding:6px 10px;border-radius:12px;font-size:11px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;background:rgba(255,255,255,0.6);border:1px solid rgba(100,110,255,0.28);color:#444}
+  .concept-b .chip.bad{background:rgba(255,59,48,0.12);border-color:rgba(255,59,48,0.35);color:#a62020}
+  .concept-b .chip.warn{background:rgba(247,181,0,0.12);border-color:rgba(247,181,0,0.35);color:#9f6000}
+  .concept-b .slot-card.future .machine-row{opacity:0.55}
+
+  /* --- Propuesta C: Oscuro de alto contraste --- */
+  .concept-c{color:#f5f5f7}
+  .concept-c::before{background:linear-gradient(135deg,rgba(16,19,38,0.95),rgba(20,24,60,0.85));filter:blur(0px)}
+  .concept-c .concept-meta p{color:rgba(210,214,255,0.78)}
+  .concept-c .summary-chip{background:rgba(20,24,60,0.65);border-color:rgba(90,110,255,0.4)}
+  .concept-c .summary-chip.ok{color:#6dffcb;border-color:rgba(109,255,203,0.4);background:rgba(109,255,203,0.14)}
+  .concept-c .summary-chip.warn{color:#ffd66d;border-color:rgba(255,214,109,0.4);background:rgba(255,214,109,0.16)}
+  .concept-c .summary-chip.bad{color:#ff9393;border-color:rgba(255,147,147,0.4);background:rgba(255,147,147,0.16)}
+  .concept-c .summary-chip.rate{color:#80a6ff;border-color:rgba(128,166,255,0.45);background:rgba(128,166,255,0.18)}
+  .concept-c .panel{border-radius:26px;background:rgba(10,12,26,0.78);border:1px solid rgba(106,124,255,0.35);box-shadow:0 26px 54px rgba(0,0,0,0.55);overflow:hidden}
+  .grid-c{width:100%;border-collapse:separate;border-spacing:0}
+  .grid-c thead th{padding:16px 14px;font-size:12px;letter-spacing:0.1em;text-transform:uppercase;color:rgba(189,198,255,0.78);border-bottom:1px solid rgba(87,108,255,0.35);background:rgba(16,19,46,0.96);position:sticky;top:0;z-index:3}
+  .grid-c thead .sub{display:block;margin-top:4px;font-size:11px;font-weight:500;letter-spacing:0;color:rgba(189,198,255,0.75);text-transform:none}
+  .grid-c thead th.time{left:0;z-index:4;box-shadow:12px 0 18px -12px rgba(0,0,0,0.7)}
+  .grid-c tbody td{padding:16px 14px;font-size:13.5px;color:rgba(240,243,255,0.85);border-bottom:1px solid rgba(87,108,255,0.25);backdrop-filter:blur(6px)}
+  .grid-c tbody td.machine-divider{border-left:1px solid rgba(87,108,255,0.25)}
+  .grid-c tbody tr:nth-child(odd){background:rgba(25,29,60,0.6)}
+  .grid-c tbody tr:nth-child(even){background:rgba(18,21,46,0.62)}
+  .grid-c tbody tr:hover{background:rgba(40,48,98,0.75)}
+  .grid-c .time-cell{font-weight:650;color:#fff;position:sticky;left:0;background:linear-gradient(90deg,rgba(16,19,46,0.96) 78%,rgba(16,19,46,0));border-right:1px solid rgba(87,108,255,0.35)}
+  .grid-c .status{display:flex;justify-content:center}
+  .grid-c .swatch{width:60px;height:22px;border-radius:12px;border:1px solid rgba(120,140,255,0.45);box-shadow:inset 0 -2px 8px rgba(0,0,0,0.35)}
+  .grid-c .swatch.ok{background:linear-gradient(135deg,rgba(46,204,113,0.8),rgba(109,255,189,0.95));border-color:rgba(109,255,189,0.5)}
+  .grid-c .swatch.warn{background:linear-gradient(135deg,rgba(255,197,87,0.8),rgba(255,225,160,0.9));border-color:rgba(255,225,160,0.5)}
+  .grid-c .swatch.bad{background:linear-gradient(135deg,rgba(255,82,82,0.85),rgba(255,140,140,0.95));border-color:rgba(255,140,140,0.55)}
+  .grid-c .swatch.future{background:repeating-linear-gradient(135deg,rgba(120,140,255,0.35) 0,rgba(120,140,255,0.35) 7px,rgba(18,21,46,0.7) 7px,rgba(18,21,46,0.7) 14px)}
+  .grid-c .tags{display:flex;flex-wrap:wrap;gap:6px}
+  .grid-c .tag{display:inline-flex;align-items:center;justify-content:center;min-width:38px;padding:6px 10px;border-radius:12px;font-size:11px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase}
+  .grid-c .tag.bad{background:rgba(255,104,104,0.16);border:1px solid rgba(255,104,104,0.45);color:#ff9ea4}
+  .grid-c .tag.warn{background:rgba(255,215,120,0.16);border:1px solid rgba(255,215,120,0.4);color:#ffd978}
+  .grid-c tr.current{outline:1.5px solid rgba(128,166,255,0.75);outline-offset:-2px;box-shadow:0 0 0 1px rgba(128,166,255,0.45) inset}
+
+  @media (max-width:960px){
+    .grid-a thead th.machine,.grid-c thead th.machine{display:none}
+    .grid-a tbody td:nth-of-type(4n+2),
+    .grid-a tbody td:nth-of-type(4n+3),
+    .grid-c tbody td:nth-of-type(4n+2),
+    .grid-c tbody td:nth-of-type(4n+3){display:none}
+    .grid-a tbody td.machine-divider,
+    .grid-c tbody td.machine-divider{border-left:none}
+    .concept-b .machine-row{flex-direction:column}
+    .concept-b .machine-label{flex:0 0 auto}
   }
 </style>
 </head>
 <body>
-  <div class="wrap">
-    <header>
-      <div class="title">
-        <h1>Dashboard de Operación — 4 Máquinas</h1>
-        <div class="subtitle">
-          Jornada: <strong>06:00</strong> a <strong>16:00</strong> · Intervalo cada <strong>15 min</strong>
-          <div class="chips">
-            <span class="chip"><span class="dot ok"></span> Estado positivo</span>
-            <span class="chip"><span class="dot warn"></span> Aviso</span>
-            <span class="chip"><span class="dot bad"></span> Estado negativo</span>
-          </div>
+  <div class="page">
+    <header class="page-head">
+      <div class="head-copy">
+        <h1>Exploración visual del tablero de operación</h1>
+        <p>Se generaron tres propuestas contrastantes a partir de los mismos datos en tiempo real para que puedas elegir la dirección visual que mejor se adapte al proyecto. Cada bloque cubre la jornada de 06:00 a 12:00 horas con cortes de 15 minutos y estados diferenciados solo por color.</p>
+        <div class="meta-chips">
+          <span class="meta-chip"><span class="dot ok"></span> Correcto</span>
+          <span class="meta-chip"><span class="dot warn"></span> Aviso</span>
+          <span class="meta-chip"><span class="dot bad"></span> Crítico</span>
         </div>
       </div>
-      <div class="controls">
+      <div class="head-actions">
         <button id="regen">Generar nuevos datos</button>
-        <button id="scrollNow" class="ghost">Ir al bloque horario actual</button>
+        <button id="scrollNow" class="secondary">Ver bloque actual</button>
       </div>
     </header>
 
-    <div class="panel">
-      <table class="tbl" id="grid">
-        <thead id="thead"></thead>
-        <tbody id="tbody"></tbody>
-      </table>
-    </div>
+    <main>
+      <section class="concept concept-a">
+        <div class="concept-meta">
+          <span class="badge">Propuesta A · Matriz aireada</span>
+          <h2>Rejilla minimalista inspirada en paneles de producción premium</h2>
+          <p>Disposición clásica de tabla con mucha respiración, divisores verticales claros entre máquinas y énfasis en el bloque horario actual con halo azul. Ideal si buscas mantener una jerarquía corporativa sobria.</p>
+        </div>
+        <div class="concept-body">
+          <div class="panel">
+            <table class="grid-a">
+              <thead id="head-a"></thead>
+              <tbody id="body-a"></tbody>
+            </table>
+          </div>
+          <div class="summary">
+            <span class="summary-chip ok" id="summary-a-ok">OK: —</span>
+            <span class="summary-chip warn" id="summary-a-warn">Avisos: —</span>
+            <span class="summary-chip bad" id="summary-a-bad">Fallas: —</span>
+            <span class="summary-chip rate" id="summary-a-rate">Disponibilidad: —</span>
+          </div>
+        </div>
+      </section>
 
-    <div class="mini" style="margin-top:12px">
-      <span class="pill" id="summary-ok">OK: —</span>
-      <span class="pill" id="summary-warn">Avisos: —</span>
-      <span class="pill" id="summary-bad">Fallas: —</span>
-      <span class="pill" id="summary-rate">Disponibilidad: —</span>
-    </div>
+      <section class="concept concept-b">
+        <div class="concept-meta">
+          <span class="badge">Propuesta B · Tarjetas modulares</span>
+          <h2>Bloques independientes por horario con estética de app analítica</h2>
+          <p>Cada intervalo se convierte en una tarjeta flexible con barras de color y cápsulas compactas por máquina. Permite colocar varias tarjetas por fila y facilita una lectura más narrativa.</p>
+        </div>
+        <div class="concept-body">
+          <div class="cards" id="cards-b"></div>
+          <div class="summary">
+            <span class="summary-chip ok" id="summary-b-ok">OK: —</span>
+            <span class="summary-chip warn" id="summary-b-warn">Avisos: —</span>
+            <span class="summary-chip bad" id="summary-b-bad">Fallas: —</span>
+            <span class="summary-chip rate" id="summary-b-rate">Disponibilidad: —</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="concept concept-c">
+        <div class="concept-meta">
+          <span class="badge">Propuesta C · Nocturna de alto contraste</span>
+          <h2>Tablero oscuro con iluminaciones neón para ambientes de monitoreo</h2>
+          <p>Versión inmersiva tipo sala de control con fondos degradados y resaltados luminosos. Las incidencias destacan con acentos neón mientras que el resto del tablero se mantiene discreto.</p>
+        </div>
+        <div class="concept-body">
+          <div class="panel">
+            <table class="grid-c">
+              <thead id="head-c"></thead>
+              <tbody id="body-c"></tbody>
+            </table>
+          </div>
+          <div class="summary">
+            <span class="summary-chip ok" id="summary-c-ok">OK: —</span>
+            <span class="summary-chip warn" id="summary-c-warn">Avisos: —</span>
+            <span class="summary-chip bad" id="summary-c-bad">Fallas: —</span>
+            <span class="summary-chip rate" id="summary-c-rate">Disponibilidad: —</span>
+          </div>
+        </div>
+      </section>
+    </main>
   </div>
 
 <script>
 (function(){
-  // ----- Configuración -----
   const machines = [
     { name: "Máquina 1" },
     { name: "Máquina 2" },
@@ -119,7 +259,6 @@
     { name: "Máquina 4" },
   ];
 
-  // Condiciones base (en el mismo orden que tu hoja)
   const FIELDS = [
     "Gafete operador escaneado",
     "Gafete de técnico escaneado",
@@ -129,7 +268,15 @@
     "Carrete en consumo",
   ];
 
-  // Qué se considera crítico para caer en ROJO si está en false
+  const FIELD_TAG = {
+    "Gafete operador escaneado": "OP",
+    "Gafete de técnico escaneado": "TEC",
+    "Carrete escaneado": "CAR",
+    "Hoja de ruta escaneada": "RUTA",
+    "Cabezal en operación": "HEAD",
+    "Carrete en consumo": "MAT",
+  };
+
   const CRITICAL = new Set([
     "Carrete escaneado",
     "Cabezal en operación",
@@ -137,21 +284,21 @@
   ]);
 
   const start = "06:00";
-  const end   = "16:00";
+  const end   = "12:00";
   const stepMinutes = 15;
 
-  // Probabilidades base (afinables)
   const P = {
     badgeOperador: 0.96,
     badgeTecnico : 0.94,
     carreteScan  : 0.93,
     hojaRuta     : 0.91,
     operacion    : 0.82,
-    consumoSiOperando: 0.93, // si opera, prob de consumo true
-    consumoSiNoOpera : 0.10, // si no opera, casi siempre false
+    consumoSiOperando: 0.93,
+    consumoSiNoOpera : 0.10,
   };
 
-  // ----- Utilidades -----
+  const STATUS_LABELS = { ok: "Activo", warn: "Aviso", bad: "Falla", future: "Pendiente" };
+
   const toMinutes = (hhmm)=> {
     const [h,m] = hhmm.split(":").map(Number);
     return h*60+m;
@@ -161,7 +308,6 @@
   const buildSlots = (a,b,step)=>{const out=[],A=toMinutes(a),B=toMinutes(b);for(let t=A;t<=B;t+=step) out.push(fmt(t));return out;};
   const chance = (p)=> Math.random()<p;
 
-  // Registra un diccionario de T/F por campo con correlaciones realistas
   function crearRegistroTF(){
     const tf = {};
     tf[FIELDS[0]] = chance(P.badgeOperador);
@@ -169,118 +315,227 @@
     tf[FIELDS[2]] = chance(P.carreteScan);
     tf[FIELDS[3]] = chance(P.hojaRuta);
     tf[FIELDS[4]] = chance(P.operacion);
-    // Consumo depende de si está operando
     tf[FIELDS[5]] = tf[FIELDS[4]] ? chance(P.consumoSiOperando) : chance(P.consumoSiNoOpera);
     return tf;
   }
 
-  // Evalúa: verde/amarillo/rojo + mensaje
   function evaluarRegistro(tf){
     const errores = [];
     const avisos = [];
     for(const k of FIELDS){
       if(!tf[k]){
-        if(CRITICAL.has(k)) errores.push(`Error: ${k}`);
-        else avisos.push(`Aviso: ${k}`);
+        if(CRITICAL.has(k)) errores.push(k);
+        else avisos.push(k);
       }
     }
     if(errores.length===0 && avisos.length===0){
-      return {class:"ok", label:"Activo", msg:"Todo en orden"};
+      return {class:"ok", errores, avisos};
     }
     if(errores.length>0){
-      return {class:"bad", label:"Falla", msg:[...errores, ...avisos].join(", ")};
+      return {class:"bad", errores, avisos};
     }
-    // solo avisos (faltantes no críticos)
-    return {class:"warn", label:"En espera", msg:avisos.join(", ")};
+    return {class:"warn", errores, avisos};
   }
 
-  // ----- Render de cabecera -----
-  function renderHead(){
-    const thead = document.getElementById("thead");
-    const tr1 = document.createElement("tr");
-    tr1.innerHTML = `
-      <th style="left:0;z-index:4" class="time">Horario</th>
-      ${machines.map(m=>`<th colspan="2">${m.name}<div class="sub">Status · Condición (según reglas)</div></th>`).join("")}
-    `;
-    thead.innerHTML = "";
-    thead.appendChild(tr1);
-  }
-
-  // ----- Generación y render de datos -----
-  function generateData(){
+  function buildDataset(){
     const slots = buildSlots(start,end,stepMinutes);
-
-    let cOK=0, cWARN=0, cBAD=0;
-
-    const tbody = document.getElementById("tbody");
-    tbody.innerHTML = "";
-
     const now = new Date();
     const currentMinutes = now.getHours()*60 + now.getMinutes();
 
+    const rows = [];
+    let cOK=0, cWARN=0, cBAD=0;
+
     for(const hhmm of slots){
-      const tr = document.createElement("tr");
+      const rowMinutes = toMinutes(hhmm);
+      const isFuture = rowMinutes > currentMinutes;
+      const isCurrent = rowMinutes <= currentMinutes && currentMinutes < rowMinutes + stepMinutes;
 
-      // Columna horario
-      const tdTime = document.createElement("td");
-      tdTime.textContent = hhmm;
-      tdTime.className = "time";
-      tr.appendChild(tdTime);
-
-      // Por cada máquina: evaluar condiciones -> estado + detalle
-      machines.forEach(()=> {
+      const cells = machines.map(()=>{
+        if(isFuture){
+          return { state:"future", labels:[] };
+        }
         const tf = crearRegistroTF();
         const ev = evaluarRegistro(tf);
-
-        const tdStatus = document.createElement("td");
-        tdStatus.innerHTML = `<span class="status ${ev.class}">
-            <span class="dot ${ev.class}"></span>${ev.label}
-          </span>`;
-
-        const tdCond = document.createElement("td");
-        tdCond.className = "cond";
-        tdCond.innerHTML = (ev.class==="ok")
-          ? `<span class="dot warn" style="margin-right:8px;opacity:.5"></span>Todo en orden`
-          : `<span class="dot ${ev.class==='bad'?'bad':'warn'}" style="margin-right:8px"></span>${ev.msg}`;
-
-        tr.appendChild(tdStatus);
-        tr.appendChild(tdCond);
-
-        if(ev.class==="ok") cOK++; else if(ev.class==="warn") cWARN++; else cBAD++;
+        if(ev.class === "ok") cOK++;
+        if(ev.class === "warn") cWARN++;
+        if(ev.class === "bad") cBAD++;
+        const labels = [
+          ...ev.errores.map(field=>({type:"bad", tag:FIELD_TAG[field]||field})),
+          ...ev.avisos.map(field=>({type:"warn", tag:FIELD_TAG[field]||field})),
+        ];
+        return { state:ev.class, labels };
       });
 
-      // Resalta el bloque horario actual si cae dentro del intervalo
-      const rowMins = toMinutes(hhmm);
-      if (rowMins <= currentMinutes && currentMinutes < rowMins + stepMinutes){
-        tr.classList.add("now");
-        tr.id = "nowRow";
-      }
-
-      tbody.appendChild(tr);
+      rows.push({ time:hhmm, isFuture, isCurrent, cells });
     }
 
-    // Resumen
     const total = cOK + cWARN + cBAD;
     const disponibilidad = total ? Math.round((cOK/total)*100) : 0;
-    document.getElementById("summary-ok").textContent   = `OK: ${cOK}`;
-    document.getElementById("summary-warn").textContent = `Avisos: ${cWARN}`;
-    document.getElementById("summary-bad").textContent  = `Fallas: ${cBAD}`;
-    document.getElementById("summary-rate").textContent = `Disponibilidad: ${disponibilidad}%`;
+
+    return {
+      rows,
+      summary: { ok:cOK, warn:cWARN, bad:cBAD, rate:disponibilidad }
+    };
   }
 
-  // ----- Acciones -----
+  function renderDesignA(data){
+    const thead = document.getElementById("head-a");
+    const tbody = document.getElementById("body-a");
+    thead.innerHTML = `
+      <tr>
+        <th class="time">Horario</th>
+        ${machines.map(m=>`<th class="machine" colspan="2">${m.name}<span class="sub">Status · Condición</span></th>`).join("")}
+      </tr>
+    `;
+    tbody.innerHTML = "";
+
+    data.rows.forEach((row, rowIndex)=>{
+      const tr = document.createElement("tr");
+      if(row.isCurrent) tr.classList.add("current");
+      if(row.isCurrent) tr.id = "nowRowA";
+
+      const tdTime = document.createElement("td");
+      tdTime.textContent = row.time;
+      tdTime.className = "time-cell";
+      tr.appendChild(tdTime);
+
+      row.cells.forEach((cell, idx)=>{
+        const tdStatus = document.createElement("td");
+        tdStatus.className = "status";
+        if(idx>0) tdStatus.classList.add("machine-divider");
+        tdStatus.innerHTML = `<span class="swatch ${cell.state}"></span>`;
+        tr.appendChild(tdStatus);
+
+        const tdCond = document.createElement("td");
+        if(idx>0) tdCond.classList.add("machine-divider");
+        if(cell.labels.length){
+          tdCond.innerHTML = `<div class="tags">${cell.labels.map(l=>`<span class="tag ${l.type}">${l.tag}</span>`).join("")}</div>`;
+        } else {
+          tdCond.innerHTML = "";
+        }
+        tr.appendChild(tdCond);
+      });
+
+      tbody.appendChild(tr);
+    });
+  }
+
+  function renderDesignB(data){
+    const container = document.getElementById("cards-b");
+    container.innerHTML = "";
+    data.rows.forEach(row=>{
+      const card = document.createElement("div");
+      card.className = "slot-card";
+      if(row.isFuture) card.classList.add("future");
+      if(row.isCurrent) card.classList.add("current");
+
+      const header = document.createElement("div");
+      header.className = "slot-header";
+      header.innerHTML = `
+        <span class="slot-time">${row.time}</span>
+        <span class="slot-status">
+          ${row.cells.map(cell=>`<span class="pill ${cell.state}"></span>`).join("")}
+        </span>
+      `;
+      card.appendChild(header);
+
+      const body = document.createElement("div");
+      body.className = "slot-body";
+
+      row.cells.forEach((cell, idx)=>{
+        const machineRow = document.createElement("div");
+        machineRow.className = "machine-row";
+        const label = document.createElement("div");
+        label.className = "machine-label";
+        label.textContent = machines[idx].name;
+        machineRow.appendChild(label);
+
+        const statusWrap = document.createElement("div");
+        statusWrap.className = "machine-status";
+        statusWrap.innerHTML = `<span class="status-bar ${cell.state}"></span>`;
+        if(cell.labels.length){
+          const tags = document.createElement("div");
+          tags.className = "machine-tags";
+          tags.innerHTML = cell.labels.map(l=>`<span class="chip ${l.type}">${l.tag}</span>`).join("");
+          statusWrap.appendChild(tags);
+        }
+        machineRow.appendChild(statusWrap);
+        body.appendChild(machineRow);
+      });
+
+      card.appendChild(body);
+      container.appendChild(card);
+    });
+  }
+
+  function renderDesignC(data){
+    const thead = document.getElementById("head-c");
+    const tbody = document.getElementById("body-c");
+    thead.innerHTML = `
+      <tr>
+        <th class="time">Horario</th>
+        ${machines.map(m=>`<th class="machine" colspan="2">${m.name}<span class="sub">Status · Condición</span></th>`).join("")}
+      </tr>
+    `;
+    tbody.innerHTML = "";
+
+    data.rows.forEach((row, rowIndex)=>{
+      const tr = document.createElement("tr");
+      if(row.isCurrent) tr.classList.add("current");
+
+      const tdTime = document.createElement("td");
+      tdTime.textContent = row.time;
+      tdTime.className = "time-cell";
+      tr.appendChild(tdTime);
+
+      row.cells.forEach((cell, idx)=>{
+        const tdStatus = document.createElement("td");
+        tdStatus.className = "status";
+        if(idx>0) tdStatus.classList.add("machine-divider");
+        tdStatus.innerHTML = `<span class="swatch ${cell.state}"></span>`;
+        tr.appendChild(tdStatus);
+
+        const tdCond = document.createElement("td");
+        if(idx>0) tdCond.classList.add("machine-divider");
+        if(cell.labels.length){
+          tdCond.innerHTML = `<div class="tags">${cell.labels.map(l=>`<span class="tag ${l.type}">${l.tag}</span>`).join("")}</div>`;
+        } else {
+          tdCond.innerHTML = "";
+        }
+        tr.appendChild(tdCond);
+      });
+
+      tbody.appendChild(tr);
+    });
+  }
+
+  function updateSummaries(summary, prefix){
+    document.getElementById(`summary-${prefix}-ok`).textContent = `OK: ${summary.ok}`;
+    document.getElementById(`summary-${prefix}-warn`).textContent = `Avisos: ${summary.warn}`;
+    document.getElementById(`summary-${prefix}-bad`).textContent = `Fallas: ${summary.bad}`;
+    document.getElementById(`summary-${prefix}-rate`).textContent = `Disponibilidad: ${summary.rate}%`;
+  }
+
+  function renderAll(){
+    const data = buildDataset();
+    renderDesignA(data);
+    renderDesignB(data);
+    renderDesignC(data);
+    updateSummaries(data.summary, "a");
+    updateSummaries(data.summary, "b");
+    updateSummaries(data.summary, "c");
+  }
+
   function scrollToNow(){
-    const el = document.getElementById("nowRow");
+    const el = document.getElementById("nowRowA");
     if(!el){ window.scrollTo({top:0,behavior:"smooth"}); return; }
-    const top = el.getBoundingClientRect().top + window.scrollY - 90;
+    const top = el.getBoundingClientRect().top + window.scrollY - 120;
     window.scrollTo({top, behavior:"smooth"});
-    el.animate([{outlineColor:"transparent"}, {outlineColor:"var(--accent)"}], {duration:600,iterations:1});
+    el.animate([{outlineColor:"transparent"},{outlineColor:"var(--accent)"}],{duration:600,iterations:1});
   }
 
-  // Init
-  renderHead();
-  generateData();
-  document.getElementById("regen").addEventListener("click", generateData);
+  renderAll();
+  document.getElementById("regen").addEventListener("click", renderAll);
   document.getElementById("scrollNow").addEventListener("click", scrollToNow);
 })();
 </script>
