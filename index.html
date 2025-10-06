@@ -3,71 +3,85 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Dashboard de Máquinas — Jornada 06:00–16:00</title>
+<title>Dashboard de Máquinas — Jornada 06:00–12:00</title>
 <style>
   :root{
-    --bg:#fff;
+    --bg:#f5f5f7;
     --panel:#fff;
-    --muted:#ff;
-    --text:#000;
-    --ok:#000;
-    --bad:#000;
-    --warn:#000;
-    --line:#1f2430;
-    --chip-bg:#fff;
-    --chip-br:#fff;
-    --accent:#4da3ff;
+    --muted:#6e6e73;
+    --text:#1d1d1f;
+    --ok:#34c759;
+    --bad:#ff3b30;
+    --warn:#ff9f0a;
+    --line:#d2d2d7;
+    --chip-bg:#f5f5f7;
+    --chip-br:#e5e5ea;
+    --accent:#0071e3;
+    --shadow:0 18px 44px rgba(0,0,0,0.08);
   }
   *{box-sizing:border-box}
   html,body{height:100%}
   body{
     margin:0;
-    font-family: ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Inter,Helvetica,Arial;
-    background:#fff;
+    font-family:"SF Pro Display","SF Pro Text",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+    background:var(--bg);
     color:var(--text);
+    -webkit-font-smoothing:antialiased;
   }
-  .wrap{max-width:1200px;margin-inline:auto;padding:28px 18px 40px}
-  header{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:18px}
+  .wrap{max-width:min(1360px,98vw);margin-inline:auto;padding:40px 12px 64px}
+  header{display:flex;align-items:flex-start;justify-content:space-between;gap:20px;margin-bottom:28px}
   .title{display:flex;flex-direction:column;gap:6px}
-  .title h1{margin:0;font-size:clamp(18px,2.2vw,24px);font-weight:650;letter-spacing:.3px}
-  .subtitle{color:var(--muted);font-size:14px}
-  .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
-  .chip{display:inline-flex;align-items:center;gap:8px;padding:8px 10px;border:1px solid var(--chip-br);border-radius:12px;background:var(--chip-bg);color:var(--muted);font-size:12.5px}
-  .dot{width:8px;height:8px;border-radius:999px;background:var(--muted);box-shadow:0 0 0 1px #0003 inset}
+  .title h1{margin:0;font-size:clamp(20px,2.6vw,28px);font-weight:650;letter-spacing:.2px}
+  .subtitle{color:var(--muted);font-size:14px;line-height:1.6}
+  .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+  .chip{display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border:1px solid var(--chip-br);border-radius:999px;background:var(--chip-bg);color:var(--muted);font-size:12.5px}
+  .dot{width:8px;height:8px;border-radius:999px;background:var(--muted);box-shadow:0 0 0 1px rgba(0,0,0,0.06) inset}
   .dot.ok{background:var(--ok)}
   .dot.bad{background:var(--bad)}
   .dot.warn{background:var(--warn)}
   .controls{display:flex;flex-wrap:wrap;gap:10px}
-  button,.ghost{appearance:none;border:1px solid #2a3244;background:#101521;color:var(--text);padding:10px 12px;border-radius:10px;font-weight:600;cursor:pointer;transition:.18s transform ease,.18s background ease,.18s border-color ease}
-  button:hover{transform:translateY(-1px);border-color:#334059;background:#111827}
-  .ghost{background:transparent}
-  .panel{background:var(--panel);border:1px solid #fff;border-radius:16px;overflow:hidden;box-shadow:0 10px 28px rgba(0,0,0,.25)}
+  button,.ghost{appearance:none;border:1px solid var(--chip-br);background:#fff;color:var(--text);padding:10px 16px;border-radius:999px;font-weight:600;cursor:pointer;transition:.18s transform ease,.18s background ease,.18s border-color ease;box-shadow:0 6px 12px rgba(0,0,0,0.04)}
+  button:hover{transform:translateY(-1px);border-color:#c7c7cc;background:#f2f2f7}
+  .ghost{background:var(--bg)}
+  .panel{background:var(--panel);border:1px solid #e5e5ea;border-radius:22px;overflow:hidden;box-shadow:var(--shadow)}
   /* Tabla */
   .tbl{width:100%;border-collapse:separate;border-spacing:0}
   thead th{
-    position:sticky;top:0;z-index:3;background:linear-gradient(180deg,#141a24 0%,#141821 100%);
-    color:#cfd7ea;border-bottom:1px solid var(--line);padding:14px 12px;font-size:13px;
-    text-transform:uppercase;letter-spacing:.06em;font-weight:700;
+    position:sticky;top:0;z-index:3;background:#fff;
+    color:var(--muted);border-bottom:1px solid var(--line);padding:16px 14px;font-size:12.5px;
+    text-transform:uppercase;letter-spacing:.08em;font-weight:600;
   }
-  thead .sub{font-size:12px;text-transform:none;letter-spacing:0;color:#aab3c9}
-  tbody td{padding:12px;border-bottom:1px dashed #20283a;font-size:14.5px;color:#dfe6f7}
-  tbody tr:nth-child(odd){background:rgba(255,255,255,0.01)}
-  tbody tr:hover{background:#fff}
+  thead th.machine-head{padding-inline:18px 16px}
+  thead th.machine-head:not(:first-of-type){border-left:1.5px solid rgba(210,210,215,0.8)}
+  thead .sub{font-size:12px;text-transform:none;letter-spacing:0;color:var(--muted);margin-top:2px;font-weight:500}
+  tbody td{padding:16px 16px;border-bottom:1px solid rgba(210,210,215,0.55);font-size:14.5px;color:#3a3a3c;vertical-align:top}
+  tbody td.machine-divider{border-left:1.5px solid rgba(210,210,215,0.8)}
+  tbody td.status-cell{text-align:center;width:90px}
+  tbody tr:nth-child(odd){background:rgba(0,0,0,0.01)}
+  tbody tr:hover{background:#f7f7fb}
   .time{
-    position:sticky;left:0;background:linear-gradient(90deg,#141821 70%,rgba(20,24,33,0));
-    z-index:2;font-weight:700;color:#c9d3ea;border-right:1px solid var(--line)
+    position:sticky;left:0;background:linear-gradient(90deg,#fff 75%,rgba(255,255,255,0));
+    z-index:2;font-weight:600;color:var(--text);border-right:1px solid var(--line)
   }
-  .status{
-    display:inline-flex;align-items:center;gap:8px;font-weight:650;padding:6px 10px;border-radius:999px;
-    background:#0f141e;border:1px solid #273045
+  .status-swatch{
+    display:inline-flex;width:64px;height:22px;border-radius:999px;box-shadow:inset 0 -2px 6px rgba(0,0,0,0.12);
+    background:var(--chip-bg);border:1px solid rgba(210,210,215,0.7);
   }
-  .status.ok{color:#ccffe1;border-color:#1d3c2c;background:rgba(24,201,100,.10)}
-  .status.bad{color:#ffe1e1;border-color:#402126;background:rgba(255,77,79,.10)}
-  .status.warn{color:#fff5dc;border-color:#3d2d12;background:rgba(255,191,71,.12)}
-  .cond{color:#cdd6ee}
-  .mini{display:flex;gap:10px;align-items:center;color:var(--muted);font-size:12px}
-  .pill{padding:.2rem .55rem;border-radius:999px;border:1px solid var(--chip-br);color:#c9d3ea;background:#0f141e;font-size:12px}
-  .now{outline:2px solid var(--accent);outline-offset:-2px;background:#10182a !important}
+  .status-swatch.ok{background:linear-gradient(135deg,rgba(52,199,89,0.65),rgba(88,224,118,0.95));border-color:rgba(52,199,89,0.45)}
+  .status-swatch.warn{background:linear-gradient(135deg,rgba(255,204,0,0.65),rgba(255,214,40,0.95));border-color:rgba(255,204,0,0.5)}
+  .status-swatch.bad{background:linear-gradient(135deg,rgba(255,59,48,0.75),rgba(255,105,97,0.95));border-color:rgba(255,59,48,0.5)}
+  .status-swatch.future{background:repeating-linear-gradient(135deg,rgba(210,210,215,0.4) 0,rgba(210,210,215,0.4) 6px,rgba(255,255,255,0.6) 6px,rgba(255,255,255,0.6) 12px);border-color:rgba(210,210,215,0.6);box-shadow:none}
+  .cond{color:#515154;line-height:1.5}
+  .cond-tags{display:flex;flex-wrap:wrap;gap:6px}
+  .cond-chip{
+    display:inline-flex;align-items:center;justify-content:center;min-width:42px;padding:6px 12px;border-radius:14px;
+    font-size:11.5px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;
+  }
+  .cond-chip.bad{background:rgba(255,59,48,0.14);border:1px solid rgba(255,59,48,0.35);color:#a22022}
+  .cond-chip.warn{background:rgba(255,204,0,0.14);border:1px solid rgba(255,204,0,0.35);color:#ad5f00}
+  .mini{display:flex;gap:12px;align-items:center;color:var(--muted);font-size:12.5px;margin-top:20px}
+  .pill{padding:.35rem .8rem;border-radius:999px;border:1px solid var(--chip-br);color:var(--text);background:#fff;font-size:12.5px;box-shadow:0 6px 12px rgba(0,0,0,0.05)}
+  .now{box-shadow:inset 0 0 0 2px var(--accent);background:rgba(0,113,227,0.08)!important}
   @media (max-width: 900px){
     thead .hide-sm, tbody .hide-sm{display:none}
     .subtitle{max-width:500px}
@@ -80,7 +94,7 @@
       <div class="title">
         <h1>Dashboard de Operación — 4 Máquinas</h1>
         <div class="subtitle">
-          Jornada: <strong>06:00</strong> a <strong>16:00</strong> · Intervalo cada <strong>15 min</strong>
+          Jornada: <strong>06:00</strong> a <strong>12:00</strong> · Intervalo cada <strong>15 min</strong>
           <div class="chips">
             <span class="chip"><span class="dot ok"></span> Estado positivo</span>
             <span class="chip"><span class="dot warn"></span> Aviso</span>
@@ -129,6 +143,15 @@
     "Carrete en consumo",
   ];
 
+  const FIELD_TAG = {
+    "Gafete operador escaneado": "OP",
+    "Gafete de técnico escaneado": "TEC",
+    "Carrete escaneado": "CAR",
+    "Hoja de ruta escaneada": "RUTA",
+    "Cabezal en operación": "HEAD",
+    "Carrete en consumo": "MAT",
+  };
+
   // Qué se considera crítico para caer en ROJO si está en false
   const CRITICAL = new Set([
     "Carrete escaneado",
@@ -137,7 +160,7 @@
   ]);
 
   const start = "06:00";
-  const end   = "16:00";
+  const end   = "12:00";
   const stepMinutes = 15;
 
   // Probabilidades base (afinables)
@@ -174,24 +197,25 @@
     return tf;
   }
 
-  // Evalúa: verde/amarillo/rojo + mensaje
+  const STATUS_LABELS = { ok: "Activo", warn: "Aviso", bad: "Falla", future: "Pendiente" };
+
+  // Evalúa: color y colecciones de incidencias
   function evaluarRegistro(tf){
     const errores = [];
     const avisos = [];
     for(const k of FIELDS){
       if(!tf[k]){
-        if(CRITICAL.has(k)) errores.push(`Error: ${k}`);
-        else avisos.push(`Aviso: ${k}`);
+        if(CRITICAL.has(k)) errores.push(k);
+        else avisos.push(k);
       }
     }
     if(errores.length===0 && avisos.length===0){
-      return {class:"ok", label:"Activo", msg:"Todo en orden"};
+      return {class:"ok", errores, avisos};
     }
     if(errores.length>0){
-      return {class:"bad", label:"Falla", msg:[...errores, ...avisos].join(", ")};
+      return {class:"bad", errores, avisos};
     }
-    // solo avisos (faltantes no críticos)
-    return {class:"warn", label:"En espera", msg:avisos.join(", ")};
+    return {class:"warn", errores, avisos};
   }
 
   // ----- Render de cabecera -----
@@ -200,7 +224,7 @@
     const tr1 = document.createElement("tr");
     tr1.innerHTML = `
       <th style="left:0;z-index:4" class="time">Horario</th>
-      ${machines.map(m=>`<th colspan="2">${m.name}<div class="sub">Status · Condición (según reglas)</div></th>`).join("")}
+      ${machines.map(m=>`<th class="machine-head" colspan="2">${m.name}<div class="sub">Status · Condición (según reglas)</div></th>`).join("")}
     `;
     thead.innerHTML = "";
     thead.appendChild(tr1);
@@ -227,30 +251,46 @@
       tdTime.className = "time";
       tr.appendChild(tdTime);
 
+      const rowMins = toMinutes(hhmm);
+      const isFuture = rowMins > currentMinutes;
+
       // Por cada máquina: evaluar condiciones -> estado + detalle
-      machines.forEach(()=> {
-        const tf = crearRegistroTF();
-        const ev = evaluarRegistro(tf);
-
+      machines.forEach((_, idx)=> {
         const tdStatus = document.createElement("td");
-        tdStatus.innerHTML = `<span class="status ${ev.class}">
-            <span class="dot ${ev.class}"></span>${ev.label}
-          </span>`;
-
+        tdStatus.className = "status-cell";
         const tdCond = document.createElement("td");
         tdCond.className = "cond";
-        tdCond.innerHTML = (ev.class==="ok")
-          ? `<span class="dot warn" style="margin-right:8px;opacity:.5"></span>Todo en orden`
-          : `<span class="dot ${ev.class==='bad'?'bad':'warn'}" style="margin-right:8px"></span>${ev.msg}`;
+
+        if(idx>0){
+          tdStatus.classList.add("machine-divider");
+        }
+
+        if(isFuture){
+          tdStatus.innerHTML = `<span class="status-swatch future" title="${STATUS_LABELS.future}" aria-label="${STATUS_LABELS.future}"></span>`;
+          tdCond.textContent = "";
+        } else {
+          const tf = crearRegistroTF();
+          const ev = evaluarRegistro(tf);
+          tdStatus.innerHTML = `<span class="status-swatch ${ev.class}" title="${STATUS_LABELS[ev.class]}" aria-label="${STATUS_LABELS[ev.class]}"></span>`;
+
+          if(ev.class === "ok"){
+            tdCond.textContent = "";
+            cOK++;
+          } else {
+            const chips = [
+              ...ev.errores.map(field => `<span class="cond-chip bad">${FIELD_TAG[field]||field}</span>`),
+              ...ev.avisos.map(field => `<span class="cond-chip warn">${FIELD_TAG[field]||field}</span>`)
+            ].join("");
+            tdCond.innerHTML = `<div class="cond-tags">${chips}</div>`;
+            if(ev.class === "warn") cWARN++; else cBAD++;
+          }
+        }
 
         tr.appendChild(tdStatus);
         tr.appendChild(tdCond);
-
-        if(ev.class==="ok") cOK++; else if(ev.class==="warn") cWARN++; else cBAD++;
       });
 
       // Resalta el bloque horario actual si cae dentro del intervalo
-      const rowMins = toMinutes(hhmm);
       if (rowMins <= currentMinutes && currentMinutes < rowMins + stepMinutes){
         tr.classList.add("now");
         tr.id = "nowRow";
