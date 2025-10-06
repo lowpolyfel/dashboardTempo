@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Dashboard de Máquinas — Jornada 06:00–16:00</title>
+<style>
+  :root{
+    --bg:#fff;
+    --panel:#fff;
+    --muted:#ff;
+    --text:#000;
+    --ok:#000;
+    --bad:#000;
+    --warn:#000;
+    --line:#1f2430;
+    --chip-bg:#fff;
+    --chip-br:#fff;
+    --accent:#4da3ff;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0;
+    font-family: ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Inter,Helvetica,Arial;
+    background:#fff;
+    color:var(--text);
+  }
+  .wrap{max-width:1200px;margin-inline:auto;padding:28px 18px 40px}
+  header{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:18px}
+  .title{display:flex;flex-direction:column;gap:6px}
+  .title h1{margin:0;font-size:clamp(18px,2.2vw,24px);font-weight:650;letter-spacing:.3px}
+  .subtitle{color:var(--muted);font-size:14px}
+  .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+  .chip{display:inline-flex;align-items:center;gap:8px;padding:8px 10px;border:1px solid var(--chip-br);border-radius:12px;background:var(--chip-bg);color:var(--muted);font-size:12.5px}
+  .dot{width:8px;height:8px;border-radius:999px;background:var(--muted);box-shadow:0 0 0 1px #0003 inset}
+  .dot.ok{background:var(--ok)}
+  .dot.bad{background:var(--bad)}
+  .dot.warn{background:var(--warn)}
+  .controls{display:flex;flex-wrap:wrap;gap:10px}
+  button,.ghost{appearance:none;border:1px solid #2a3244;background:#101521;color:var(--text);padding:10px 12px;border-radius:10px;font-weight:600;cursor:pointer;transition:.18s transform ease,.18s background ease,.18s border-color ease}
+  button:hover{transform:translateY(-1px);border-color:#334059;background:#111827}
+  .ghost{background:transparent}
+  .panel{background:var(--panel);border:1px solid #fff;border-radius:16px;overflow:hidden;box-shadow:0 10px 28px rgba(0,0,0,.25)}
+  /* Tabla */
+  .tbl{width:100%;border-collapse:separate;border-spacing:0}
+  thead th{
+    position:sticky;top:0;z-index:3;background:linear-gradient(180deg,#141a24 0%,#141821 100%);
+    color:#cfd7ea;border-bottom:1px solid var(--line);padding:14px 12px;font-size:13px;
+    text-transform:uppercase;letter-spacing:.06em;font-weight:700;
+  }
+  thead .sub{font-size:12px;text-transform:none;letter-spacing:0;color:#aab3c9}
+  tbody td{padding:12px;border-bottom:1px dashed #20283a;font-size:14.5px;color:#dfe6f7}
+  tbody tr:nth-child(odd){background:rgba(255,255,255,0.01)}
+  tbody tr:hover{background:#fff}
+  .time{
+    position:sticky;left:0;background:linear-gradient(90deg,#141821 70%,rgba(20,24,33,0));
+    z-index:2;font-weight:700;color:#c9d3ea;border-right:1px solid var(--line)
+  }
+  .status{
+    display:inline-flex;align-items:center;gap:8px;font-weight:650;padding:6px 10px;border-radius:999px;
+    background:#0f141e;border:1px solid #273045
+  }
+  .status.ok{color:#ccffe1;border-color:#1d3c2c;background:rgba(24,201,100,.10)}
+  .status.bad{color:#ffe1e1;border-color:#402126;background:rgba(255,77,79,.10)}
+  .status.warn{color:#fff5dc;border-color:#3d2d12;background:rgba(255,191,71,.12)}
+  .cond{color:#cdd6ee}
+  .mini{display:flex;gap:10px;align-items:center;color:var(--muted);font-size:12px}
+  .pill{padding:.2rem .55rem;border-radius:999px;border:1px solid var(--chip-br);color:#c9d3ea;background:#0f141e;font-size:12px}
+  .now{outline:2px solid var(--accent);outline-offset:-2px;background:#10182a !important}
+  @media (max-width: 900px){
+    thead .hide-sm, tbody .hide-sm{display:none}
+    .subtitle{max-width:500px}
+  }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="title">
+        <h1>Dashboard de Operación — 4 Máquinas</h1>
+        <div class="subtitle">
+          Jornada: <strong>06:00</strong> a <strong>16:00</strong> · Intervalo cada <strong>15 min</strong>
+          <div class="chips">
+            <span class="chip"><span class="dot ok"></span> Estado positivo</span>
+            <span class="chip"><span class="dot warn"></span> Aviso</span>
+            <span class="chip"><span class="dot bad"></span> Estado negativo</span>
+          </div>
+        </div>
+      </div>
+      <div class="controls">
+        <button id="regen">Generar nuevos datos</button>
+        <button id="scrollNow" class="ghost">Ir al bloque horario actual</button>
+      </div>
+    </header>
+
+    <div class="panel">
+      <table class="tbl" id="grid">
+        <thead id="thead"></thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+
+    <div class="mini" style="margin-top:12px">
+      <span class="pill" id="summary-ok">OK: —</span>
+      <span class="pill" id="summary-warn">Avisos: —</span>
+      <span class="pill" id="summary-bad">Fallas: —</span>
+      <span class="pill" id="summary-rate">Disponibilidad: —</span>
+    </div>
+  </div>
+
+<script>
+(function(){
+  // ----- Configuración -----
+  const machines = [
+    { name: "Máquina 1" },
+    { name: "Máquina 2" },
+    { name: "Máquina 3" },
+    { name: "Máquina 4" },
+  ];
+
+  // Condiciones base (en el mismo orden que tu hoja)
+  const FIELDS = [
+    "Gafete operador escaneado",
+    "Gafete de técnico escaneado",
+    "Carrete escaneado",
+    "Hoja de ruta escaneada",
+    "Cabezal en operación",
+    "Carrete en consumo",
+  ];
+
+  // Qué se considera crítico para caer en ROJO si está en false
+  const CRITICAL = new Set([
+    "Carrete escaneado",
+    "Cabezal en operación",
+    "Carrete en consumo",
+  ]);
+
+  const start = "06:00";
+  const end   = "16:00";
+  const stepMinutes = 15;
+
+  // Probabilidades base (afinables)
+  const P = {
+    badgeOperador: 0.96,
+    badgeTecnico : 0.94,
+    carreteScan  : 0.93,
+    hojaRuta     : 0.91,
+    operacion    : 0.82,
+    consumoSiOperando: 0.93, // si opera, prob de consumo true
+    consumoSiNoOpera : 0.10, // si no opera, casi siempre false
+  };
+
+  // ----- Utilidades -----
+  const toMinutes = (hhmm)=> {
+    const [h,m] = hhmm.split(":").map(Number);
+    return h*60+m;
+  };
+  const pad = (n)=> (n<10?"0":"")+n;
+  const fmt = (mins)=> `${pad(Math.floor(mins/60))}:${pad(mins%60)}`;
+  const buildSlots = (a,b,step)=>{const out=[],A=toMinutes(a),B=toMinutes(b);for(let t=A;t<=B;t+=step) out.push(fmt(t));return out;};
+  const chance = (p)=> Math.random()<p;
+
+  // Registra un diccionario de T/F por campo con correlaciones realistas
+  function crearRegistroTF(){
+    const tf = {};
+    tf[FIELDS[0]] = chance(P.badgeOperador);
+    tf[FIELDS[1]] = chance(P.badgeTecnico);
+    tf[FIELDS[2]] = chance(P.carreteScan);
+    tf[FIELDS[3]] = chance(P.hojaRuta);
+    tf[FIELDS[4]] = chance(P.operacion);
+    // Consumo depende de si está operando
+    tf[FIELDS[5]] = tf[FIELDS[4]] ? chance(P.consumoSiOperando) : chance(P.consumoSiNoOpera);
+    return tf;
+  }
+
+  // Evalúa: verde/amarillo/rojo + mensaje
+  function evaluarRegistro(tf){
+    const errores = [];
+    const avisos = [];
+    for(const k of FIELDS){
+      if(!tf[k]){
+        if(CRITICAL.has(k)) errores.push(`Error: ${k}`);
+        else avisos.push(`Aviso: ${k}`);
+      }
+    }
+    if(errores.length===0 && avisos.length===0){
+      return {class:"ok", label:"Activo", msg:"Todo en orden"};
+    }
+    if(errores.length>0){
+      return {class:"bad", label:"Falla", msg:[...errores, ...avisos].join(", ")};
+    }
+    // solo avisos (faltantes no críticos)
+    return {class:"warn", label:"En espera", msg:avisos.join(", ")};
+  }
+
+  // ----- Render de cabecera -----
+  function renderHead(){
+    const thead = document.getElementById("thead");
+    const tr1 = document.createElement("tr");
+    tr1.innerHTML = `
+      <th style="left:0;z-index:4" class="time">Horario</th>
+      ${machines.map(m=>`<th colspan="2">${m.name}<div class="sub">Status · Condición (según reglas)</div></th>`).join("")}
+    `;
+    thead.innerHTML = "";
+    thead.appendChild(tr1);
+  }
+
+  // ----- Generación y render de datos -----
+  function generateData(){
+    const slots = buildSlots(start,end,stepMinutes);
+
+    let cOK=0, cWARN=0, cBAD=0;
+
+    const tbody = document.getElementById("tbody");
+    tbody.innerHTML = "";
+
+    const now = new Date();
+    const currentMinutes = now.getHours()*60 + now.getMinutes();
+
+    for(const hhmm of slots){
+      const tr = document.createElement("tr");
+
+      // Columna horario
+      const tdTime = document.createElement("td");
+      tdTime.textContent = hhmm;
+      tdTime.className = "time";
+      tr.appendChild(tdTime);
+
+      // Por cada máquina: evaluar condiciones -> estado + detalle
+      machines.forEach(()=> {
+        const tf = crearRegistroTF();
+        const ev = evaluarRegistro(tf);
+
+        const tdStatus = document.createElement("td");
+        tdStatus.innerHTML = `<span class="status ${ev.class}">
+            <span class="dot ${ev.class}"></span>${ev.label}
+          </span>`;
+
+        const tdCond = document.createElement("td");
+        tdCond.className = "cond";
+        tdCond.innerHTML = (ev.class==="ok")
+          ? `<span class="dot warn" style="margin-right:8px;opacity:.5"></span>Todo en orden`
+          : `<span class="dot ${ev.class==='bad'?'bad':'warn'}" style="margin-right:8px"></span>${ev.msg}`;
+
+        tr.appendChild(tdStatus);
+        tr.appendChild(tdCond);
+
+        if(ev.class==="ok") cOK++; else if(ev.class==="warn") cWARN++; else cBAD++;
+      });
+
+      // Resalta el bloque horario actual si cae dentro del intervalo
+      const rowMins = toMinutes(hhmm);
+      if (rowMins <= currentMinutes && currentMinutes < rowMins + stepMinutes){
+        tr.classList.add("now");
+        tr.id = "nowRow";
+      }
+
+      tbody.appendChild(tr);
+    }
+
+    // Resumen
+    const total = cOK + cWARN + cBAD;
+    const disponibilidad = total ? Math.round((cOK/total)*100) : 0;
+    document.getElementById("summary-ok").textContent   = `OK: ${cOK}`;
+    document.getElementById("summary-warn").textContent = `Avisos: ${cWARN}`;
+    document.getElementById("summary-bad").textContent  = `Fallas: ${cBAD}`;
+    document.getElementById("summary-rate").textContent = `Disponibilidad: ${disponibilidad}%`;
+  }
+
+  // ----- Acciones -----
+  function scrollToNow(){
+    const el = document.getElementById("nowRow");
+    if(!el){ window.scrollTo({top:0,behavior:"smooth"}); return; }
+    const top = el.getBoundingClientRect().top + window.scrollY - 90;
+    window.scrollTo({top, behavior:"smooth"});
+    el.animate([{outlineColor:"transparent"}, {outlineColor:"var(--accent)"}], {duration:600,iterations:1});
+  }
+
+  // Init
+  renderHead();
+  generateData();
+  document.getElementById("regen").addEventListener("click", generateData);
+  document.getElementById("scrollNow").addEventListener("click", scrollToNow);
+})();
+</script>
+</body>
+</html>
