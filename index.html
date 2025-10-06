@@ -28,7 +28,7 @@
     color:var(--text);
     -webkit-font-smoothing:antialiased;
   }
-  .wrap{max-width:min(1240px,96vw);margin-inline:auto;padding:40px 20px 64px}
+  .wrap{max-width:min(1360px,98vw);margin-inline:auto;padding:40px 12px 64px}
   header{display:flex;align-items:flex-start;justify-content:space-between;gap:20px;margin-bottom:28px}
   .title{display:flex;flex-direction:column;gap:6px}
   .title h1{margin:0;font-size:clamp(20px,2.6vw,28px);font-weight:650;letter-spacing:.2px}
@@ -51,11 +51,14 @@
     color:var(--muted);border-bottom:1px solid var(--line);padding:16px 14px;font-size:12.5px;
     text-transform:uppercase;letter-spacing:.08em;font-weight:600;
   }
+  thead th.machine-head{padding-inline:18px 16px}
+  thead th.machine-head:not(:first-of-type){border-left:1.5px solid rgba(210,210,215,0.8)}
   thead .sub{font-size:12px;text-transform:none;letter-spacing:0;color:var(--muted);margin-top:2px;font-weight:500}
-  tbody td{padding:16px 14px;border-bottom:1px solid rgba(210,210,215,0.6);font-size:14.5px;color:#3a3a3c;vertical-align:top}
+  tbody td{padding:16px 16px;border-bottom:1px solid rgba(210,210,215,0.55);font-size:14.5px;color:#3a3a3c;vertical-align:top}
+  tbody td.machine-divider{border-left:1.5px solid rgba(210,210,215,0.8)}
   tbody td.status-cell{text-align:center;width:90px}
-  tbody tr:nth-child(odd){background:rgba(0,0,0,0.015)}
-  tbody tr:hover{background:#f2f2f7}
+  tbody tr:nth-child(odd){background:rgba(0,0,0,0.01)}
+  tbody tr:hover{background:#f7f7fb}
   .time{
     position:sticky;left:0;background:linear-gradient(90deg,#fff 75%,rgba(255,255,255,0));
     z-index:2;font-weight:600;color:var(--text);border-right:1px solid var(--line)
@@ -149,6 +152,15 @@
     "Carrete en consumo": "MAT",
   };
 
+  const FIELD_TAG = {
+    "Gafete operador escaneado": "OP",
+    "Gafete de técnico escaneado": "TEC",
+    "Carrete escaneado": "CAR",
+    "Hoja de ruta escaneada": "RUTA",
+    "Cabezal en operación": "HEAD",
+    "Carrete en consumo": "MAT",
+  };
+
   // Qué se considera crítico para caer en ROJO si está en false
   const CRITICAL = new Set([
     "Carrete escaneado",
@@ -221,7 +233,7 @@
     const tr1 = document.createElement("tr");
     tr1.innerHTML = `
       <th style="left:0;z-index:4" class="time">Horario</th>
-      ${machines.map(m=>`<th colspan="2">${m.name}<div class="sub">Status · Condición (según reglas)</div></th>`).join("")}
+      ${machines.map(m=>`<th class="machine-head" colspan="2">${m.name}<div class="sub">Status · Condición (según reglas)</div></th>`).join("")}
     `;
     thead.innerHTML = "";
     thead.appendChild(tr1);
@@ -252,11 +264,15 @@
       const isFuture = rowMins > currentMinutes;
 
       // Por cada máquina: evaluar condiciones -> estado + detalle
-      machines.forEach(()=> {
+      machines.forEach((_, idx)=> {
         const tdStatus = document.createElement("td");
         tdStatus.className = "status-cell";
         const tdCond = document.createElement("td");
         tdCond.className = "cond";
+
+        if(idx>0){
+          tdStatus.classList.add("machine-divider");
+        }
 
         if(isFuture){
           tdStatus.innerHTML = `<span class="status-swatch future" title="${STATUS_LABELS.future}" aria-label="${STATUS_LABELS.future}"></span>`;
