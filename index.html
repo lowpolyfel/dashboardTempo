@@ -1,420 +1,52 @@
 <!DOCTYPE html>
 <html lang="es">
-<head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Wire Bonder — Línea + Resumen (chips con icono)</title>
-<style>
-  :root{
-    --bg:#fff; --ink:#1a1f2b; --muted:#667085; --line:#e7e9ee; --card:#f7f8fb;
-    --ok:#16a34a;   /* verde intenso */
-    --warn:#f59e0b; /* naranja intenso */
-    --bad:#ef4444;  /* rojo intenso */
-    --info:#2563eb;
-    --radius:16px;
-  }
-  *{box-sizing:border-box}
-  html,body{height:100%}
-  body{margin:0; font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Inter,Roboto,Helvetica,Arial; color:var(--ink); background:var(--bg)}
-  .wrap{max-width:none; margin:0 auto; padding:12px 16px}
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Plantilla de Panel de Producción</title>
+    <link rel="stylesheet" href="assets/css/main.css" />
+  </head>
+  <body>
+    <div class="wrap">
+      <header class="topbar">
+        <div class="legend">
+          <span class="pill"><span class="dot ok"></span>Estado positivo</span>
+          <span class="pill"><span class="dot warn"></span>Advertencia</span>
+          <span class="pill"><span class="dot bad"></span>Crítico</span>
+          <span class="pill"><span class="dot info"></span>Información</span>
+        </div>
+        <button id="btnGenerate" class="btn">Actualizar datos</button>
+      </header>
 
-  /* Top bar */
-  .topbar{display:flex; justify-content:space-between; align-items:center; gap:10px; margin-bottom:8px}
-  .legend{display:flex; gap:10px; align-items:center; flex-wrap:wrap}
-  .pill{display:inline-flex; align-items:center; gap:8px; padding:6px 10px; border:1px solid var(--line); border-radius:999px; background:#fff; font-size:12px; color:var(--muted)}
-  .dot{width:10px; height:10px; border-radius:99px}
-  .dot.ok{background:var(--ok)} .dot.warn{background:var(--warn)} .dot.bad{background:var(--bad)} .dot.info{background:var(--info)}
-  .btn{appearance:none; border:1px solid #cfe0ff; background:#e9f2ff; border-radius:10px; padding:8px 12px; font-size:14px; cursor:pointer}
+      <main class="grid">
+        <section class="timeline-bare" id="timelineBox">
+          <table id="timeline">
+            <thead>
+              <tr>
+                <th style="text-align:left">Horario</th>
+                <th>Máquina A</th>
+                <th>Máquina B</th>
+                <th>Máquina C</th>
+                <th>Máquina D</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </section>
 
-  /* Layout 55/45 */
-  .grid{display:grid; grid-template-columns: 55fr 45fr; gap:12px; align-items:start}
-  @media (max-width: 1200px){ .grid{grid-template-columns:1fr} }
-
-  /* ====== Timeline (sólo la línea) ====== */
-  .timeline-bare{height:calc(100vh - 80px); overflow:auto}
-  table{width:100%; border-collapse:collapse}
-  th,td{border-bottom:1px solid var(--line); padding:10px; text-align:center; font-size:13px; vertical-align:middle}
-  thead th{position:sticky; top:0; background:#fff; z-index:1}
-  td.time{font-weight:600; text-align:left}
-  tr.current{background:#f0f7ff}
-  tr.current td{border-bottom-color:#cfe0ff}
-
-  /* Chips de color con icono (sin texto) */
- .chip{
-  display:inline-flex; align-items:center; justify-content:center;
-  width:108px;           /* antes 86px */
-  height:36px;           /* antes 28px */
-  border-radius:999px;
-  border:1px solid rgba(0,0,0,.08);
-}
-  .chip.ok{   background:var(--ok)  }
-  .chip.warn{ background:var(--warn)}
-  .chip.bad{  background:var(--bad) }
-  .chip.future{
-    width:86px; height:28px; border-radius:999px;
-    background:repeating-linear-gradient(135deg,#f8f9fc 0 8px,#e9edf7 8px 16px);
-    border:1px dashed var(--line);
-  }
-  .chip .ico{display:inline-flex}
-.chip .ico svg{
-  width:22px;            /* antes 16px */
-  height:22px;           /* antes 16px */
-  fill:#fff;
-}
-
-/* (opcional) pequeña sombra para contraste */
-.chip.ok, .chip.warn, .chip.bad { box-shadow: 0 1px 0 rgba(0,0,0,.08) inset; }
-
-  /* ====== Resumen 2×2 (factores grandes) ====== */
-  .right-col{display:flex; flex-direction:column; gap:12px; height:calc(100vh - 80px); overflow:auto}
-  .right-col h2{margin:0 0 4px 0; font-size:18px}
-  .machines{display:grid; grid-template-columns:1fr 1fr; gap:16px}
-  .machine{background:var(--card); border:1px solid var(--line); border-radius:12px; padding:12px; display:flex; flex-direction:column; gap:12px}
-  .header{display:flex; justify-content:space-between; align-items:center}
-  .header strong{font-size:20px}
-  .state{display:flex; gap:6px; align-items:center}
-  .badge{font-size:14px; padding:4px 8px; border-radius:999px; border:1px solid #e2e8f0; background:#fff}
-  .rows{display:grid; grid-template-columns:1fr 1fr; gap:12px}
-  .row{
-    background:#fff; border:1px solid var(--line); border-radius:10px;
-    padding:14px; font-size:14px; line-height:1.2;
-    display:flex; align-items:center; justify-content:space-between; gap:12px;
-  }
-  .oval{width:28px; height:16px; border-radius:999px; border:1px solid var(--line)}
-  .oval.ok{background:var(--ok); border-color:var(--ok)}
-  .oval.bad{background:var(--bad); border-color:var(--bad)}
-  .kpis{display:grid; grid-template-columns:1fr 1fr; gap:10px}
-  .k{background:#fff; border:1px solid var(--line); border-radius:8px; padding:10px}
-  .k .label{font-size:12px; color:var(--muted)} .k .val{font-weight:600; margin-top:4px}
-
-  @media (max-width: 1400px){
-    .machines{grid-template-columns:1fr}
-    .rows{grid-template-columns:1fr}
-  }
-</style>
-</head>
-<body>
-<div class="wrap">
-  <div class="topbar">
-    <div class="legend">
-      <span class="pill"><span class="dot ok"></span>Estado positivo</span>
-      <span class="pill"><span class="dot warn"></span>Advertencia</span>
-      <span class="pill"><span class="dot bad"></span>Crítico</span>
-      <span class="pill"><span class="dot info"></span>Información</span>
+        <aside class="right-col" id="rightCol">
+          <div>
+            <h2>Estado actual</h2>
+            <p class="description">
+              Este panel resume la actividad de cada estación y actúa como base para cualquier línea de producción. Ajusta los
+              textos, íconos y reglas según las necesidades de tu planta.
+            </p>
+            <div id="machines" class="machines"></div>
+          </div>
+        </aside>
+      </main>
     </div>
-    <button id="btnGenerate" class="btn">Actualizar datos</button>
-  </div>
 
-  <main class="grid">
-    <!-- 55%: SOLO la línea de tiempo (sin tarjeta, sin etiqueta de bloque actual) -->
-    <section class="timeline-bare" id="timelineBox">
-      <table id="timeline">
-        <thead>
-          <tr>
-            <th style="text-align:left">Horario</th>
-            <th>Máquina A</th><th>Máquina B</th><th>Máquina C</th><th>Máquina D</th>
-          </tr>
-        </thead>
-        <tbody></tbody>
-      </table>
-    </section>
-
-    <!-- 45%: Resumen -->
-    <aside class="right-col" id="rightCol">
-      <div>
-        <h2>Estado actual (resumen)</h2>
-        <div id="machines" class="machines"></div>
-      </div>
-    </aside>
-  </main>
-</div>
-
-<script>
-/* ====== Config ====== */
-const BLOCK_MIN = 15;
-const SYMMETRIC_ROWS = 8;
-const timelineBox = document.getElementById('timelineBox');
-const rightCol     = document.getElementById('rightCol');
-function resizePanels(){ const h = window.innerHeight - 80; timelineBox.style.height = h + 'px'; rightCol.style.height = h + 'px'; }
-window.addEventListener('resize', resizePanels);
-
-/* ====== Estado de máquinas (bloque actual) ====== */
-let machinesState = {
-  A: { name:"Máquina A", gafeteOperador:true,  gafeteTecnico:false, carreteEscaneado:true,  hojaRuta:true,
-       cabezalOperando:true, carreteConsumo:true, oee:92, spoolPct:78, parts:240, scrap:1 },
-  B: { name:"Máquina B", gafeteOperador:true,  gafeteTecnico:false, carreteEscaneado:true,  hojaRuta:false,
-       cabezalOperando:false, carreteConsumo:true, oee:81, spoolPct:40, parts:180, scrap:3 },
-  C: { name:"Máquina C", gafeteOperador:true,  gafeteTecnico:false, carreteEscaneado:true,  hojaRuta:true,
-       cabezalOperando:true, carreteConsumo:true, oee:88, spoolPct:63, parts:210, scrap:2 },
-  D: { name:"Máquina D", gafeteOperador:true,  gafeteTecnico:false, carreteEscaneado:true,  hojaRuta:true,
-       cabezalOperando:true, carreteConsumo:true, oee:87, spoolPct:55, parts:209, scrap:8 },
-};
-
-/* ====== Mensajes (tooltip) ====== */
-const PHRASES = {
-  missOp: "Falta escaneo de operador",
-  missTech: "Falta escaneo de técnico",
-  missSpool: "Falta escaneo de carrete",
-  missRoute: "Falta escaneo de hoja de ruta",
-  headStopped: "Cabezal detenido con operador",
-  spoolStop: "Carrete no avanza"
-};
-
-/* ====== Tiempo ====== */
-function startOfBlock(d){ const t=new Date(d); const m=t.getMinutes(); t.setMinutes(Math.floor(m/BLOCK_MIN)*BLOCK_MIN,0,0); return t; }
-function addMin(d,m){ const x=new Date(d); x.setMinutes(x.getMinutes()+m); return x; }
-function hm(d){ return d.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit', hour12:false}); }
-
-/* ====== Reglas (tabla de verdad) ====== */
-function classifyFromBooleans(s){
-  const scans = [s.gafeteOperador, s.gafeteTecnico, s.carreteEscaneado, s.hojaRuta];
-  const machs = [s.cabezalOperando, s.carreteConsumo];
-  const scan_false = scans.filter(v=>!v).length;
-  const mach_false = machs.filter(v=>!v).length;
-  if(scan_false===0 && mach_false===0) return {sev:'ok', causes:[]};
-
-  const causes=[];
-  if(!s.gafeteOperador) causes.push(PHRASES.missOp);
-  if(!s.gafeteTecnico)  causes.push(PHRASES.missTech);
-  if(!s.carreteEscaneado) causes.push(PHRASES.missSpool);
-  if(!s.hojaRuta)       causes.push(PHRASES.missRoute);
-  if(!s.cabezalOperando && s.gafeteOperador) causes.push(PHRASES.headStopped);
-  if(!s.carreteConsumo) causes.push(PHRASES.spoolStop);
-
-  if(scan_false>=3 || (scan_false>=2 && mach_false>=1) || (scan_false>=1 && mach_false>=2)){
-    return {sev:'bad', causes};
-  }
-  return {sev:'warn', causes};
-}
-
-/* ====== ICONOS ====== */
-const ICON = {
-  check:  '<svg viewBox="0 0 20 20"><path d="M7.629 14.571 3.2 10.143l1.414-1.414 3.015 3.015 7.757-7.757 1.414 1.414z"/></svg>',
-  warn:   '<svg viewBox="0 0 20 20"><path d="M10 2 1 18h18L10 2zm0 5 1 6H9l1-6zm-1 9h2v2H9v-2z"/></svg>',
-  cross:  '<svg viewBox="0 0 20 20"><path d="M5.293 5.293 10 10l4.707-4.707 1.414 1.414L11.414 11.414l4.707 4.707-1.414 1.414L10 12.828l-4.707 4.707-1.414-1.414 4.707-4.707-4.707-4.707z"/></svg>',
-};
-
-/* ====== Chips (sin texto, con icono) ====== */
-const chipOK    = (title='OK')         => `<span class="chip ok"   title="${title}"><span class="ico">${ICON.check}</span></span>`;
-const chipWarn  = (causes)             => `<span class="chip warn" title="${causes.join(' | ')}"><span class="ico">${ICON.warn}</span></span>`;
-const chipBad   = (causes)             => `<span class="chip bad"  title="${causes.join(' | ')}"><span class="ico">${ICON.cross}</span></span>`;
-const chipFuture= ()                   => `<span class="chip future"></span>`;
-
-/* ====== Random + KPIs ====== */
-function randBool(p){ return Math.random() < p; }
-function randomFlags(){
-  return {
-    gafeteOperador:  randBool(0.9),
-    gafeteTecnico:   randBool(0.3),
-    carreteEscaneado:randBool(0.85),
-    hojaRuta:        randBool(0.85),
-    cabezalOperando: randBool(0.85),
-    carreteConsumo:  randBool(0.85),
-  };
-}
-function randomizeKPIs(s){
-  s.parts += Math.floor(Math.random()*8);
-  if(Math.random()>0.9) s.scrap += 1;
-  s.oee = Math.max(40, Math.min(98, Math.round(60 + Math.random()*40)));
-  s.spoolPct = Math.max(0, s.spoolPct - Math.floor(Math.random()*3));
-}
-
-/* ====== Cache de ventana (para que el botón afecte todo) ====== */
-let windowCache = null;
-const MACHINE_IDS = ['A','B','C','D'];
-
-function regenerateWindowCache(){
-  const current = startOfBlock(new Date());
-  windowCache = [];
-
-  for(let i=SYMMETRIC_ROWS;i>0;i--){
-    const t=addMin(current,-i*BLOCK_MIN);
-    const row = {date:t, time:hm(t), current:false, future:false, states:{}};
-    MACHINE_IDS.forEach(id=>{
-      const flags = randomFlags();
-      const {sev,causes} = classifyFromBooleans(flags);
-      row.states[id] = {sev, tooltip: causes.join(' | ') || 'OK'};
-    });
-    windowCache.push(row);
-  }
-
-  // Actual (consistente con resumen)
-  const rowNow = {date:current, time:hm(current), current:true, future:false, states:{}};
-  MACHINE_IDS.forEach(id=>{
-    const {sev,causes} = classifyFromBooleans(machinesState[id]);
-    rowNow.states[id] = {sev, tooltip: causes.join(' | ') || 'OK'};
-  });
-  windowCache.push(rowNow);
-
-  // Futuras
-  for(let i=1;i<=SYMMETRIC_ROWS;i++){
-    const t=addMin(current,i*BLOCK_MIN);
-    windowCache.push({date:t, time:hm(t), current:false, future:true, states:{}});
-  }
-}
-
-/* ====== Render línea ====== */
-function renderTimeline(){
-  if(!windowCache) regenerateWindowCache();
-  const tb = document.querySelector('#timeline tbody'); tb.innerHTML='';
-  let currentRowEl=null;
-
-  windowCache.forEach(r=>{
-    const tr=document.createElement('tr');
-    tr.className = (r.current?' current':'');
-    const cells = r.future
-      ? MACHINE_IDS.map(()=>`<td>${chipFuture()}</td>`).join('')
-      : MACHINE_IDS.map(id=>{
-          const st = r.states[id];
-          if(!st) return `<td>${chipFuture()}</td>`;
-          if(st.sev==='ok')   return `<td>${chipOK(st.tooltip)}</td>`;
-          if(st.sev==='warn') return `<td>${chipWarn(st.tooltip?st.tooltip.split(' | '):[])}</td>`;
-          return `<td>${chipBad(st.tooltip?st.tooltip.split(' | '):[])}</td>`;
-        }).join('');
-    // SIN etiqueta “Ahora”
-    tr.innerHTML = `<td class="time">${r.time}</td>${cells}`;
-    if(r.current) currentRowEl=tr;
-    tb.appendChild(tr);
-  });
-
-  if(currentRowEl){
-    setTimeout(()=> currentRowEl.scrollIntoView({behavior:'smooth', block:'center'}), 0);
-  }
-
-  updateConsecutiveOK();
-  renderSummary();
-}
-
-/* ====== OK consecutivos (min) computados desde cache ====== */
-const consecutiveOK = {A:0,B:0,C:0,D:0};
-function updateConsecutiveOK(){
-  const idxNow = windowCache.findIndex(r=>r.current);
-  MACHINE_IDS.forEach(id=>{
-    let count=0;
-    for(let i=idxNow;i>=0;i--){
-      const r = windowCache[i];
-      if(r.future) break;
-      if(r.states[id]?.sev==='ok') count++; else break;
-    }
-    consecutiveOK[id]=count*BLOCK_MIN;
-  });
-}
-
-/* ====== Resumen (2×2) ====== */
-function renderSummary(){
-  const host=document.getElementById('machines'); host.innerHTML='';
-  MACHINE_IDS.forEach(id=>{
-    const s=machinesState[id];
-    const {sev}=classifyFromBooleans(s);
-
-    const card=document.createElement('div');
-    card.className='machine';
-    card.innerHTML = `
-      <div class="header">
-        <strong>${s.name}</strong>
-        <div class="state"><span class="dot ${sev}"></span><span class="badge">${sev==='ok'?'OK':sev==='warn'?'Advertencia':'Crítico'}</span></div>
-      </div>
-
-      <div class="rows">
-        <div class="row">Cabezal operando <span class="oval ${s.cabezalOperando?'ok':'bad'}"></span></div>
-        <div class="row">Carrete en uso <span class="oval ${s.carreteConsumo?'ok':'bad'}"></span></div>
-        <div class="row">Gafete de operador <span class="oval ${s.gafeteOperador?'ok':'bad'}"></span></div>
-        <div class="row">Gafete de técnico <span class="oval ${s.gafeteTecnico?'ok':'bad'}"></span></div>
-        <div class="row">Carrete escaneado <span class="oval ${s.carreteEscaneado?'ok':'bad'}"></span></div>
-        <div class="row">Hoja de ruta <span class="oval ${s.hojaRuta?'ok':'bad'}"></span></div>
-        <div class="row">Tiempo operando <span><strong>${consecutiveOK[id]} min</strong></span></div>
-      </div>
-
-      <div class="kpis">
-        <div class="k"><div class="label">Piezas</div><div class="val">${s.parts}</div></div>
-        <div class="k"><div class="label">Scrap</div><div class="val">${s.scrap}</div></div>
-        <div class="k"><div class="label">OEE</div><div class="val">${s.oee}%</div></div>
-        <div class="k"><div class="label">Carrete</div><div class="val">${s.spoolPct}%</div></div>
-      </div>
-    `;
-    host.appendChild(card);
-  });
-}
-
-/* ====== Reglas de re-escaneo (True -> False) ====== */
-const timers = {
-  A:{stoppedWithOpMin:0, spoolWhileHeadOffMin:0, idleMin:0, techIdleMin:0, lastSpoolPct:null, criticalHits:[]},
-  B:{stoppedWithOpMin:0, spoolWhileHeadOffMin:0, idleMin:0, techIdleMin:0, lastSpoolPct:null, criticalHits:[]},
-  C:{stoppedWithOpMin:0, spoolWhileHeadOffMin:0, idleMin:0, techIdleMin:0, lastSpoolPct:null, criticalHits:[]},
-  D:{stoppedWithOpMin:0, spoolWhileHeadOffMin:0, idleMin:0, techIdleMin:0, lastSpoolPct:null, criticalHits:[]},
-};
-const TTL = { headStoppedWithOp:10, spoolWithHeadOff:5, routeIdleExpire:30, techAway:20, criticalWindow:60, block:15 };
-
-function applyRescanRules(){
-  MACHINE_IDS.forEach(id=>{
-    const s = machinesState[id], t = timers[id];
-    if(t.lastSpoolPct == null) t.lastSpoolPct = s.spoolPct;
-
-    if(!s.cabezalOperando && !s.carreteConsumo) t.idleMin += TTL.block; else t.idleMin = 0;
-    if(!s.cabezalOperando && s.gafeteOperador) t.stoppedWithOpMin += TTL.block; else t.stoppedWithOpMin = 0;
-    if(s.carreteConsumo && !s.cabezalOperando) t.spoolWhileHeadOffMin += TTL.block; else t.spoolWhileHeadOffMin = 0;
-    if(s.gafeteTecnico && !s.cabezalOperando && !s.carreteConsumo) t.techIdleMin += TTL.block; else t.techIdleMin = 0;
-
-    if(t.stoppedWithOpMin >= TTL.headStoppedWithOp && s.gafeteOperador) s.gafeteOperador=false;
-    if(t.spoolWhileHeadOffMin >= TTL.spoolWithHeadOff && s.carreteEscaneado) s.carreteEscaneado=false;
-
-    if(Math.abs((s.spoolPct ?? 0) - (t.lastSpoolPct ?? 0)) >= 15 || (s.spoolPct ?? 0) > (t.lastSpoolPct ?? 0)) s.carreteEscaneado=false;
-    t.lastSpoolPct = s.spoolPct;
-
-    if(t.idleMin >= TTL.routeIdleExpire && s.hojaRuta) s.hojaRuta=false;
-    if(t.techIdleMin >= TTL.techAway && s.gafeteTecnico) s.gafeteTecnico=false;
-
-    const now=Date.now();
-    t.criticalHits=(t.criticalHits||[]).filter(ts=> now - ts <= TTL.criticalWindow*60*1000);
-    if((t.criticalHits||[]).length>=3) s.gafeteTecnico=false;
-  });
-}
-
-/* ====== Mutaciones ====== */
-function randomizeCurrent(){
-  MACHINE_IDS.forEach(id=>{
-    const s=machinesState[id];
-    const flip=(p)=>Math.random()<p;
-    if(flip(0.25)) s.cabezalOperando=!s.cabezalOperando;
-    if(flip(0.25)) s.carreteConsumo=!s.carreteConsumo;
-    if(flip(0.20)) s.gafeteOperador=Math.random()>0.15;
-    if(flip(0.15)) s.gafeteTecnico=Math.random()>0.7;
-    if(flip(0.20)) s.carreteEscaneado=Math.random()>0.2;
-    if(flip(0.20)) s.hojaRuta=Math.random()>0.2;
-
-    randomizeKPIs(s);
-  });
-}
-
-/* ====== Cache/Render ====== */
-function refresh(){ renderTimeline(); }
-
-document.addEventListener('DOMContentLoaded', ()=>{
-  resizePanels();
-  regenerateWindowCache();
-  refresh();
-
-  // Avanza de bloque (chequeo cada 10 s) → cambia actual y toda la ventana
-  let lastLabel='';
-  setInterval(()=>{
-    const lbl = `${hm(startOfBlock(new Date()))} – ${BLOCK_MIN} min`;
-    if(lbl!==lastLabel){
-      randomizeCurrent();
-      applyRescanRules();
-      regenerateWindowCache();
-      refresh();
-      lastLabel=lbl;
-    }
-  }, 10000);
-
-  // Botón: afecta todo (pasado y actual)
-  document.getElementById('btnGenerate').addEventListener('click', ()=>{
-    randomizeCurrent();
-    applyRescanRules();
-    regenerateWindowCache();
-    refresh();
-  });
-});
-</script>
-</body>
+    <script type="module" src="assets/js/app.js"></script>
+  </body>
 </html>
