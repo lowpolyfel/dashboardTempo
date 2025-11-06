@@ -6,7 +6,9 @@ archivos independientes de HTML, CSS y JavaScript para facilitar la personalizac
 ## Estructura del proyecto
 
 ```
+
 public/
+>>>>>>> origin/main
 ├── assets/
 │   ├── css/
 │   │   └── main.css
@@ -15,7 +17,12 @@ public/
 │       ├── data.js
 │       ├── logic.js
 │       └── render.js
+<<<<<<< HEAD
+├── index.html
+└── README.md
+=======
 └── index.html
+
 ```
 
 - **index.html**: Contiene la estructura del documento y enlaza los recursos de estilo y scripts.
@@ -27,8 +34,13 @@ public/
 
 ## Uso local
 
+
+1. Abre `index.html` en tu navegador preferido.
+2. Personaliza los archivos dentro de `assets/` para ajustar estilos, reglas de negocio o textos según tus necesidades.
+=======
 1. Abre `public/index.html` en tu navegador preferido.
 2. Personaliza los archivos dentro de `public/assets/` para ajustar estilos, reglas de negocio o textos según tus necesidades.
+
 
 ## Personalización sugerida
 
